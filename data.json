@@ -1,16 +1,124 @@
 {
-    "template": {
-        "id": 0,
-        "guildId": 0,
-        "name": "Default Room",
-        "maxSize": null,
-        "members": []
+  "templates": {
+    "room template": {
+      "id": 0,
+      "guildId": 0,
+      "name": "Default Room",
+      "maxSize": null,
+      "members": []
     },
+    "group template": {
+      "id": 0,
+      "guildId": 0,
+      "name": "Default Group",
+      "startTime": null,
+      "status": {
+        "Unknown": null,
+        "Planned": 0,
+        "Ongoing": 1,
+        "Completed": 2
+      },
+      "maxSize": null,
+      "members": []
+    },
+    "role template": {
+      "id": 0,
+      "guildId": 0,
+      "name": "Default Role",
+      "maxSize": null,
+      "members": []
+    },
+    "run template": {
+      "id": 0,
+      "guildId": 0,
+      "name": "Default Run",
+      "category": "Default Category",
+      "startTime": null,
+      "duration": null,
+      "status": {
+        "Unknown": null,
+        "Planned": 0,
+        "Ongoing": 1,
+        "Completed": 2
+      },
+      "maxSize": null,
+      "members": []
+    },
+    "hotspot template": {
+      "id": 0,
+      "guildId": 0,
+      "name": "Default Hotspot",
+      "type": {
+        "Unknown": null,
+        "Restaurant": 0,
+        "Cafe": 1,
+        "Bar": 2,
+        "Sports": 3
+      },
+      "URL": null,
+      "Address": null,
+      "maxSize": null,
+      "members": []
+    }
+  },
     "rooms": [
         {
             "id": 1,
             "guildId": "1091809778860302366",
             "name": "Hotel",
+            "maxSize": null,
+            "members": [
+                "138667796006436864"
+            ]
+        }
+    ],
+    "groups": [
+        {
+            "id": 1,
+            "guildId": "1091809778860302366",
+            "name": "Twins versus Guardians",
+            "startTime": "2026-07-07T18:40-06:00",
+            "status": 0,
+            "maxSize": null,
+            "members": [
+                "138667796006436864"
+            ]
+        }
+    ],
+    "roles": [
+        {
+            "id": 1,
+            "guildId": "1091809778860302366",
+            "name": "Attending",
+            "maxSize": null,
+            "members": [
+                "138667796006436864"
+            ]
+        }
+    ],
+    "runs": [
+        {
+            "id": 1,
+            "guildId": "1091809778860302366",
+            "name": "Super Mario 64",
+            "category": "120 Star",
+            "startTime": "2026-07-11T21:00-06:00",
+            "duration": "PT1H40M",
+            "status": 0,
+            "maxSize": null,
+            "members": [
+                "138667796006436864"
+            ]
+        }
+    ],
+    "hotspots": [
+        {
+            "id": 1,
+            "guildId": "1091809778860302366",
+            "name": "Caribou Coffee",
+            "type": 1,
+            "URL": "https://www.cariboucoffee.com",
+            "Address": "509 Washington Ave S, Minneapolis, MN 55415",
             "maxSize": null,
             "members": [
                 "138667796006436864"

@@ -1,0 +1,52 @@
+General information:
+ISO 8601 Date Conversions - yyyy-mm-ddThh:mm:ssZ
+"Z" represents the UTC time zone, where Z is replaced with a time zone time difference (-06:00 is CST)
+
+ISO 8601 Time/Duration Conversions - PThhHmmM
+PT - Designates duration and time
+hhH - Hours, so 10H means 10 hours
+mmM - Minutes, so 59M means 29 minutes
+
+Room:
+id - Denoter
+guildid - Discord server ID (SGDQ X CH 2026 Meetup)
+name - Room name (Hotel, AirBNB, Room A)
+maxSize - Upper limit of people in a room
+members - Discord user IDs present in a room
+
+Group:
+id - Denoter
+guildid - Discord server ID (SGDQ X CH 2026 Meetup)
+name - Group name (Twins versus Guardians)
+startTime: Time that the group's event starts/needs to meet
+status - Indicates if the event has yet to happen, is happening, or has happened
+maxSize - Upper limit of people in a group
+members - Discord user IDs present in a group
+
+Role:
+id - Denoter
+guildid - Discord server ID (SGDQ X CH 2026 Meetup)
+name - Role name (2026, Attending, Hotel Dweller)
+maxSize - Upper limit of people with a role
+members - Discord user IDs who have the role
+
+Run:
+id - Denoter
+guildid - Discord server ID (SGDQ X CH 2026 Meetup)
+name - Run name (Super Mario 64)
+category - Category name (120 Star)
+startTime: Time that the run is expected to start
+duration - How long the run should be
+status - Indicates if the run has yet to happen, is happening, or has happened
+maxSize - Upper limit of people with a role
+members - Discord user IDs who have the role
+
+Hotspot:
+id - Denoter
+guildid - Discord server ID (SGDQ X CH 2026 Meetup)
+name - Hotspot name (Caribou Coffee)
+type - Hopspot type (Restaurant, Cafe, Bar, Sports)
+URL - Hotspot website URL
+Address - Hotspot location
+maxSize - Upper limit of people opted into hotspot
+members - Discord user IDs opted into hotspot
