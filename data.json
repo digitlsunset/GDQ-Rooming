@@ -1,0 +1,20 @@
+{
+    "template": {
+        "id": 0,
+        "guildId": 0,
+        "name": "Default Room",
+        "maxSize": null,
+        "members": []
+    },
+    "rooms": [
+        {
+            "id": 1,
+            "guildId": "1091809778860302366",
+            "name": "Hotel",
+            "maxSize": null,
+            "members": [
+                "138667796006436864"
+            ]
+        }
+    ]
+}
