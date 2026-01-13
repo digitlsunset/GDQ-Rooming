@@ -4,6 +4,7 @@
             "id": 0,
             "guildId": 0,
             "name": "Default Room",
+            "roomNumber": "N/A",
             "maxSize": null,
             "members": []
         },
@@ -27,7 +28,7 @@
             "name": "Default Run",
             "category": "Default Category",
             "startTime": null,
-            "duration": 0,
+            "duration": " ",
             "status": {
                 "Unknown": null,
                 "Planned": 0,
@@ -52,87 +53,56 @@
             "members": []
         }
     },
-    "rooms": [],
-    "groups": [
+    "rooms": [
         {
             "id": 0,
             "guildId": "1028207093594984549",
-            "name": "A",
-            "startTime": null,
-            "status": null,
-            "maxSize": null,
-            "members": [
-                "401915946446487584"
-            ]
-        },
-        {
-            "id": 1,
-            "guildId": "1028207093594984549",
-            "name": "ABC",
-            "startTime": "1768345500",
-            "status": null,
-            "maxSize": 5,
-            "members": [
-                "401915946446487584"
-            ]
-        },
-        {
-            "id": 2,
-            "guildId": "1028207093594984549",
-            "name": "DEF",
-            "startTime": "123456789000000",
-            "status": null,
-            "maxSize": 11,
-            "members": [
-                "401915946446487584"
-            ]
-        },
-        {
-            "id": 3,
-            "guildId": "1028207093594984549",
-            "name": "GHI",
-            "startTime": "123",
-            "status": null,
-            "maxSize": 2,
-            "members": [
-                "401915946446487584"
-            ]
-        },
-        {
-            "id": 4,
-            "guildId": "1028207093594984549",
-            "name": "JKL",
-            "startTime": null,
-            "status": null,
-            "maxSize": null,
-            "members": [
-                "401915946446487584"
-            ]
-        },
-        {
-            "id": 5,
-            "guildId": "1028207093594984549",
-            "name": "fdsfhgdsfhjdsgfk",
-            "startTime": null,
-            "status": null,
-            "maxSize": null,
-            "members": [
-                "401915946446487584"
-            ]
-        },
-        {
-            "id": 6,
-            "guildId": "1028207093594984549",
-            "name": "bbbb",
-            "startTime": null,
-            "status": null,
-            "maxSize": 6,
+            "name": "AirBNB",
+            "maxSize": 4,
             "members": [
                 "401915946446487584"
             ]
         }
     ],
-    "runs": [],
+    "groups": [
+        {
+            "id": 0,
+            "guildId": "1028207093594984549",
+            "name": "Escape Room",
+            "startTime": "1769036400",
+            "status": null,
+            "duration": 5,
+            "members": [
+                "401915946446487584"
+            ]
+        }
+    ],
+    "runs": [
+        {
+            "id": 1,
+            "guildId": "1091809778860302366",
+            "name": "Super Mario 64",
+            "category": "120 Star",
+            "startTime": "2026-07-11T21:00-06:00",
+            "duration": "PT1H40M",
+            "status": 0,
+            "members": [
+                "138667796006436864"
+            ]
+        },
+        {
+            "id": 0,
+            "guildId": "1028207093594984549",
+            "name": "Road Trip",
+            "category": "Any% NMG",
+            "startTime": "1769036400",
+            "duration": "in 1 hours and 40 minutes",
+            "status": null,
+            "members": [
+                "401915946446487584"
+            ]
+        }
+    ],
     "hotspots": [
         {
             "id": 1,
