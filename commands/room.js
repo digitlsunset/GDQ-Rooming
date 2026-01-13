@@ -15,6 +15,11 @@ const data = new SlashCommandBuilder()
                     .setName('name')
                     .setDescription('The name of the room to create')
                     .setRequired(true))
+            .addStringOption((option) =>
+                option
+                    .setName('roomnumber')
+                    .setDescription('The room number OR address of the room to create. If not applicable, put N/A.')
+                    .setRequired(true))
             .addIntegerOption((option) =>
                 option
                     .setName('size')
@@ -83,6 +88,7 @@ async function CreateRoom(interaction) {
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
     const NAME = interaction.options.getString('name');
+    const ROOM_NUMBER = interaction.options.getString('roomnumber');
     const SIZE = interaction.options.getInteger('size');
     const template = {...appData.templates.room};
     let fail = null;
@@ -106,6 +112,7 @@ async function CreateRoom(interaction) {
     
     template.guildId = GUILD_ID;
     template.name = NAME;
+    template.roomNumber = ROOM_NUMBER;
     template.maxSize = SIZE || null;
     template.members = [USER_ID];
 
@@ -134,9 +141,9 @@ async function ViewRooms(interaction) {
     let roomList = '';
     rooms.forEach(room => {
         roomList += `> ## *${room.name}*`;
-
+        roomList += room.roomNumber !== "N/A" ? ` [${room.roomNumber}]` : '';
         roomList += room.maxSize ? ` (${room.members.length}/${room.maxSize} members)\n` : ` (${room.members.length} member(s))\n`;
-        
+
         room.members.forEach(memberId => {
             roomList += `> - <@${memberId}>\n`;
         });

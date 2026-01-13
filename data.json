@@ -57,7 +57,8 @@
         {
             "id": 0,
             "guildId": "1028207093594984549",
-            "name": "AirBNB",
+            "name": "B",
+            "roomNumber": "N/A",
             "maxSize": 4,
             "members": [
                 "401915946446487584"
