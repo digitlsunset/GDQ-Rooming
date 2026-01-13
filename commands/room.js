@@ -113,12 +113,7 @@ async function CreateRoom(interaction) {
     
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
     
-    if (SIZE) {
-         return `> ## Room *${NAME}* created with a limit of ${SIZE} members.`;
-    }
-    else {
-        return `> ## Room *${NAME}* created with no member limit.`;
-    }
+    return SIZE ? `> ## Room *${NAME}* created with a limit of ${SIZE} members.` : `> ## Room *${NAME}* created with no member limit.`;
 }
 
 async function ViewRooms(interaction) {
@@ -139,13 +134,9 @@ async function ViewRooms(interaction) {
     let roomList = '';
     rooms.forEach(room => {
         roomList += `> ## *${room.name}*`;
-        if (room.maxSize) {
-            roomList += ` (${room.members.length}/${room.maxSize} members)\n`;
-        }
-        else {
-            roomList += ` (${room.members.length} member(s))\n`;
-        }
 
+        roomList += room.maxSize ? ` (${room.members.length}/${room.maxSize} members)\n` : ` (${room.members.length} member(s))\n`;
+        
         room.members.forEach(memberId => {
             roomList += `> - <@${memberId}>\n`;
         });

@@ -11,21 +11,14 @@
             "id": 0,
             "guildId": 0,
             "name": "Default Group",
-            "startTime": null,
+            "startTime": 0,
             "status": {
                 "Unknown": null,
                 "Planned": 0,
                 "Ongoing": 1,
                 "Completed": 2
             },
-            "maxSize": null,
-            "members": []
-        },
-        "role": {
-            "id": 0,
-            "guildId": 0,
-            "name": "Default Role",
-            "maxSize": null,
+            "duration": null,
             "members": []
         },
         "run": {
@@ -34,7 +27,7 @@
             "name": "Default Run",
             "category": "Default Category",
             "startTime": null,
-            "duration": null,
+            "duration": 0,
             "status": {
                 "Unknown": null,
                 "Planned": 0,
@@ -59,96 +52,87 @@
             "members": []
         }
     },
-    "rooms": [
-        {
-            "id": 1,
-            "guildId": "1091809778860302366",
-            "name": "Hotel",
-            "maxSize": null,
-            "members": [
-                "138667796006436864"
-            ]
-        },
-        {
-            "id": 0,
-            "guildId": "1256564894933848074",
-            "name": "Test",
-            "maxSize": null,
-            "members": [
-                "138667796006436864"
-            ]
-        }
-    ],
+    "rooms": [],
     "groups": [
         {
-            "id": 1,
-            "guildId": "1091809778860302366",
-            "name": "Twins versus Guardians",
-            "startTime": "2026-07-07T18:40-06:00",
-            "status": 0,
-            "maxSize": null,
-            "members": [
-                "138667796006436864"
-            ]
-        },
-        {
             "id": 0,
-            "guildId": "1256564894933848074",
-            "name": "Test",
-            "startTime": "07/07/2026 6:00 PM",
-            "status": null,
-            "maxSize": null,
-            "members": [
-                "138667796006436864"
-            ]
-        },
-        {
-            "id": 1,
-            "guildId": "1256564894933848074",
-            "name": "Twins",
+            "guildId": "1028207093594984549",
+            "name": "A",
             "startTime": null,
             "status": null,
             "maxSize": null,
             "members": [
-                "138667796006436864"
+                "401915946446487584"
+            ]
+        },
+        {
+            "id": 1,
+            "guildId": "1028207093594984549",
+            "name": "ABC",
+            "startTime": "1768345500",
+            "status": null,
+            "maxSize": 5,
+            "members": [
+                "401915946446487584"
             ]
         },
         {
             "id": 2,
-            "guildId": "1256564894933848074",
-            "name": "Hammertime",
-            "startTime": "<t:1768265400:d>",
+            "guildId": "1028207093594984549",
+            "name": "DEF",
+            "startTime": "123456789000000",
+            "status": null,
+            "maxSize": 11,
+            "members": [
+                "401915946446487584"
+            ]
+        },
+        {
+            "id": 3,
+            "guildId": "1028207093594984549",
+            "name": "GHI",
+            "startTime": "123",
+            "status": null,
+            "maxSize": 2,
+            "members": [
+                "401915946446487584"
+            ]
+        },
+        {
+            "id": 4,
+            "guildId": "1028207093594984549",
+            "name": "JKL",
+            "startTime": null,
             "status": null,
             "maxSize": null,
             "members": [
-                "138667796006436864"
+                "401915946446487584"
             ]
-        }
-    ],
-    "roles": [
+        },
         {
-            "id": 1,
-            "guildId": "1091809778860302366",
-            "name": "Attending",
+            "id": 5,
+            "guildId": "1028207093594984549",
+            "name": "fdsfhgdsfhjdsgfk",
+            "startTime": null,
+            "status": null,
+            "maxSize": null,
             "members": [
-                "138667796006436864"
+                "401915946446487584"
             ]
-        }
-    ],
-    "runs": [
+        },
         {
-            "id": 1,
-            "guildId": "1091809778860302366",
-            "name": "Super Mario 64",
-            "category": "120 Star",
-            "startTime": "2026-07-11T21:00-06:00",
-            "duration": "PT1H40M",
-            "status": 0,
+            "id": 6,
+            "guildId": "1028207093594984549",
+            "name": "bbbb",
+            "startTime": null,
+            "status": null,
+            "maxSize": 6,
             "members": [
-                "138667796006436864"
+                "401915946446487584"
             ]
         }
     ],
+    "runs": [],
     "hotspots": [
         {
             "id": 1,

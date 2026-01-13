@@ -15,10 +15,10 @@ let appData = require('../data.json');
                     .setName('name')
                     .setDescription('The name of the group to create')
                     .setRequired(true))
-                    .addStringOption((option) =>
+            .addStringOption((option) =>
                 option
                     .setName('datetime')
-                    .setDescription('The date and time of this group\'s event')
+                    .setDescription('A Discord Hammertime of this group\'s event')
                     .setRequired(false))
             .addIntegerOption((option) =>
                 option
@@ -65,6 +65,22 @@ let appData = require('../data.json');
                     .setDescription('The name of the group to view')
                     .setRequired(true))
     )
+    // Ping Group
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName('ping')
+            .setDescription('Ping all members of a group')
+            .addStringOption((option) =>
+                option
+                    .setName('name')
+                    .setDescription('The name of the group to ping')
+                    .setRequired(true))
+            .addStringOption((option) =>
+                option
+                    .setName('message')
+                    .setDescription('Message to include with the ping')
+                    .setRequired(false))
+    )
     // Clear Groups
     .addSubcommand(subcommand =>
         subcommand
@@ -88,36 +104,34 @@ async function CreateGroup(interaction) {
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
     const NAME = interaction.options.getString('name');
-    const DATETIME = interaction.options.getString('datetime');
     const SIZE = interaction.options.getInteger('size');
     const template = {...appData.templates.group};
+
+    DATETIME = interaction.options.getString('datetime') !== null && interaction.options.getString('datetime').match(/\d+/) ? 
+                interaction.options.getString('datetime').match(/\d+/)[0] : null;
 
     appData.groups.forEach(group => {
         if (group.guildId === GUILD_ID && group.id >= template.id)
             template.id = group.id + 1;
     });
-    
+
     template.guildId = GUILD_ID;
     template.name = NAME;
-    template.startTime = DATETIME || null;
+    template.startTime = DATETIME;
     template.status = null;
-    template.maxSize = SIZE || null;
+    template.duration = SIZE || null;
     template.members = [USER_ID];
 
     appData.groups.push(template);
     
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
     
-    if (SIZE) {
-         return `> ## Group *${NAME}* created with a limit of ${SIZE} members.`;
-    }
-    else {
-        return `> ## Group *${NAME}* created with no member limit.`;
-    }
+    return SIZE ? `> ## Group *${NAME}* created with a limit of ${SIZE} members.` : `> ## Group *${NAME}* created with no member limit.`;
 }
 
 async function ViewGroups(interaction) {
     RefreshAppData();
+
     const GUILD_ID = interaction.guildId;
 
     let groups = appData.groups.filter(group => group.guildId === GUILD_ID);
@@ -133,18 +147,15 @@ async function ViewGroups(interaction) {
     let groupList = '';
     groups.forEach(group => {
         groupList += `> ## *${group.name}*`;
-        if (group.maxSize) {
-            groupList += ` (${group.members.length}/${group.maxSize} members)\n`;
-        }
-        else {
-            groupList += ` (${group.members.length} member(s))\n`;
-        }
+
+        groupList += group.maxSize ? ` (${group.members.length}/${group.maxSize} members)\n` : ` (${group.members.length} member(s))\n`;
 
         group.members.forEach(memberId => {
             groupList += `> - <@${memberId}>\n`;
         });
 
-        groupList += `> - **Event Time:** ${group.startTime || 'Not set'}\n`;
+        groupList += group.startTime && group.startTime.length === 10 ? 
+                    `> - **Event Time: ** <t:${group.startTime}:s> (<t:${group.startTime}:R>)\n` : `> - **Event Time: ** Not set\n`;
 
         groupList += '\n';
     });
@@ -154,6 +165,7 @@ async function ViewGroups(interaction) {
 
 async function JoinGroup(interaction) {
     RefreshAppData();
+
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
     const GROUP_NAME = interaction.options.getString('name');
@@ -180,6 +192,7 @@ async function JoinGroup(interaction) {
 
 async function LeaveGroup(interaction) {
     RefreshAppData();
+
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
     let GROUP_NAME = interaction.options.getString('name');
@@ -228,8 +241,37 @@ async function LeaveGroup(interaction) {
     return outcome;
 }
 
+async function PingGroup(interaction) {
+    RefreshAppData();
+
+    const GUILD_ID = interaction.guildId;
+    const GROUP_NAME = interaction.options.getString('name');
+    const MESSAGE = interaction.options.getString('message') || '';
+
+    const group = appData.groups.find(group => group.guildId === GUILD_ID && group.name === GROUP_NAME);
+
+    if (!group) {
+        return `> ## Group *${GROUP_NAME}* does not exist.`;
+    }
+
+    // Un-comment later
+    // if (group.members.length === 1) {
+    //     return `> ## Group *${GROUP_NAME}* has no other members to ping.`;
+    // }
+
+    const mentions = group.members.map(id => `<@${id}>`).join(' ');
+    const content = `> ## Members of *${group.name}*:\n> ${mentions}\n> ## ${MESSAGE}`;
+
+    // Return an object so the caller can use the proper allowedMentions to actually ping the users
+    return {
+        content,
+        allowedMentions: { users: group.members }
+    };
+}
+
 async function ClearGroups(interaction) {
     RefreshAppData();
+    
     const GUILD_ID = interaction.guildId;
 
     appData.groups = appData.groups.filter(group => group.guildId !== GUILD_ID);
@@ -252,23 +294,26 @@ module.exports = {
             return;
         }
 
-        if (subcommand === 'all') {
+        if (subcommand === 'all' || subcommand === 'view') {
             const result = await ViewGroups(interaction);
             await interaction.reply({
                 content: result,
-                allowedMentions: { parse: [] }
+                allowedMentions: { parse: [] },
+                ephemeral: true
             })
             return;
         }
 
-        if (subcommand === 'view') {
-            const result = await ViewGroups(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] }
-            })
+        if (subcommand === 'ping') {
+            const result = await PingGroup(interaction);
+            if (typeof result === 'string') {
+                await interaction.reply({ content: result, allowedMentions: { parse: [] } });
+            } else {
+                await interaction.reply(result);
+            }
             return;
         }
+
 
         if (subcommand === 'join') {
             const result = await JoinGroup(interaction);
