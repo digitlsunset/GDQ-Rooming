@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require('discord.js');
 const fs = require('fs');
 let appData = require('../data.json');
 
- const data = new SlashCommandBuilder()
+const data = new SlashCommandBuilder()
  	.setName('room')
  	.setDescription('Room functions')
     // Create Room
@@ -84,7 +84,7 @@ async function CreateRoom(interaction) {
     const USER_ID = interaction.user.id;
     const NAME = interaction.options.getString('name');
     const SIZE = interaction.options.getInteger('size');
-    const template = {...appData.template};
+    const template = {...appData.templates.room};
     let fail = null;
 
     appData.rooms.forEach(room => {
@@ -271,16 +271,7 @@ module.exports = {
             return;
         }
 
-        if (subcommand === 'all') {
-            const result = await ViewRooms(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] }
-            })
-            return;
-        }
-
-        if (subcommand === 'view') {
+        if (subcommand === 'all' || subcommand === 'view') {
             const result = await ViewRooms(interaction);
             await interaction.reply({
                 content: result,

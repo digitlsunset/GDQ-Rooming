@@ -90,20 +90,7 @@ async function CreateGroup(interaction) {
     const NAME = interaction.options.getString('name');
     const DATETIME = interaction.options.getString('datetime');
     const SIZE = interaction.options.getInteger('size');
-    const template = {...appData.template};
-    let fail = null;
-
-    appData.groups.forEach(group => {
-        if (group.guildId !== GUILD_ID) return;
-        group.members.forEach(memberId => {
-            if (memberId !== USER_ID) return;
-            fail = group.name;
-        });
-    });
-
-    if (fail) {
-        return `> ## You are already in *${fail}*. Please leave it before joining another group.`;
-    }
+    const template = {...appData.templates.group};
 
     appData.groups.forEach(group => {
         if (group.guildId === GUILD_ID && group.id >= template.id)
@@ -170,13 +157,6 @@ async function JoinGroup(interaction) {
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
     const GROUP_NAME = interaction.options.getString('name');
-
-    appData.groups.forEach(group => {
-        if (group.guildId !== GUILD_ID) return;
-        group.members.forEach(memberId => {
-            if (memberId !== USER_ID) return;
-        });
-    });
 
     const group = appData.groups.find(group => group.guildId === GUILD_ID && group.name === GROUP_NAME);
 

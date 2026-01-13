@@ -1,71 +1,78 @@
 {
-  "templates": {
-    "room template": {
-      "id": 0,
-      "guildId": 0,
-      "name": "Default Room",
-      "maxSize": null,
-      "members": []
+    "templates": {
+        "room": {
+            "id": 0,
+            "guildId": 0,
+            "name": "Default Room",
+            "maxSize": null,
+            "members": []
+        },
+        "group": {
+            "id": 0,
+            "guildId": 0,
+            "name": "Default Group",
+            "startTime": null,
+            "status": {
+                "Unknown": null,
+                "Planned": 0,
+                "Ongoing": 1,
+                "Completed": 2
+            },
+            "maxSize": null,
+            "members": []
+        },
+        "role": {
+            "id": 0,
+            "guildId": 0,
+            "name": "Default Role",
+            "maxSize": null,
+            "members": []
+        },
+        "run": {
+            "id": 0,
+            "guildId": 0,
+            "name": "Default Run",
+            "category": "Default Category",
+            "startTime": null,
+            "duration": null,
+            "status": {
+                "Unknown": null,
+                "Planned": 0,
+                "Ongoing": 1,
+                "Completed": 2
+            },
+            "members": []
+        },
+        "hotspot": {
+            "id": 0,
+            "guildId": 0,
+            "name": "Default Hotspot",
+            "type": {
+                "Unknown": null,
+                "Restaurant": 0,
+                "Cafe": 1,
+                "Bar": 2,
+                "Sports": 3
+            },
+            "URL": null,
+            "Address": null,
+            "members": []
+        }
     },
-    "group template": {
-      "id": 0,
-      "guildId": 0,
-      "name": "Default Group",
-      "startTime": null,
-      "status": {
-        "Unknown": null,
-        "Planned": 0,
-        "Ongoing": 1,
-        "Completed": 2
-      },
-      "maxSize": null,
-      "members": []
-    },
-    "role template": {
-      "id": 0,
-      "guildId": 0,
-      "name": "Default Role",
-      "maxSize": null,
-      "members": []
-    },
-    "run template": {
-      "id": 0,
-      "guildId": 0,
-      "name": "Default Run",
-      "category": "Default Category",
-      "startTime": null,
-      "duration": null,
-      "status": {
-        "Unknown": null,
-        "Planned": 0,
-        "Ongoing": 1,
-        "Completed": 2
-      },
-      "maxSize": null,
-      "members": []
-    },
-    "hotspot template": {
-      "id": 0,
-      "guildId": 0,
-      "name": "Default Hotspot",
-      "type": {
-        "Unknown": null,
-        "Restaurant": 0,
-        "Cafe": 1,
-        "Bar": 2,
-        "Sports": 3
-      },
-      "URL": null,
-      "Address": null,
-      "maxSize": null,
-      "members": []
-    }
-  },
     "rooms": [
         {
             "id": 1,
             "guildId": "1091809778860302366",
             "name": "Hotel",
+            "maxSize": null,
+            "members": [
+                "138667796006436864"
+            ]
+        },
+        {
+            "id": 0,
+            "guildId": "1256564894933848074",
+            "name": "Test",
             "maxSize": null,
             "members": [
                 "138667796006436864"
@@ -83,6 +90,39 @@
             "members": [
                 "138667796006436864"
             ]
+        },
+        {
+            "id": 0,
+            "guildId": "1256564894933848074",
+            "name": "Test",
+            "startTime": "07/07/2026 6:00 PM",
+            "status": null,
+            "maxSize": null,
+            "members": [
+                "138667796006436864"
+            ]
+        },
+        {
+            "id": 1,
+            "guildId": "1256564894933848074",
+            "name": "Twins",
+            "startTime": null,
+            "status": null,
+            "maxSize": null,
+            "members": [
+                "138667796006436864"
+            ]
+        },
+        {
+            "id": 2,
+            "guildId": "1256564894933848074",
+            "name": "Hammertime",
+            "startTime": "<t:1768265400:d>",
+            "status": null,
+            "maxSize": null,
+            "members": [
+                "138667796006436864"
+            ]
         }
     ],
     "roles": [
@@ -90,7 +130,6 @@
             "id": 1,
             "guildId": "1091809778860302366",
             "name": "Attending",
-            "maxSize": null,
             "members": [
                 "138667796006436864"
             ]
@@ -105,7 +144,6 @@
             "startTime": "2026-07-11T21:00-06:00",
             "duration": "PT1H40M",
             "status": 0,
-            "maxSize": null,
             "members": [
                 "138667796006436864"
             ]
@@ -119,7 +157,6 @@
             "type": 1,
             "URL": "https://www.cariboucoffee.com",
             "Address": "509 Washington Ave S, Minneapolis, MN 55415",
-            "maxSize": null,
             "members": [
                 "138667796006436864"
             ]

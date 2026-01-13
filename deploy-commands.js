@@ -28,10 +28,10 @@ const rest = new REST().setToken(TOKEN);
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-        await rest.put(
-        Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
-        { body: [] }, // An empty array clears all commands
-        );
+        // await rest.put(
+        // Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID),
+        // { body: [] }, // An empty array clears all commands
+        // );
 
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commands });
