@@ -48,22 +48,42 @@ const data = new SlashCommandBuilder()
                     .setDescription('The name of the room to leave')
                     .setRequired(false))
     )
-    // View All Rooms
-    .addSubcommand(subcommand =>
-        subcommand
-            .setName('all')
-            .setDescription('View all rooms')
-    )
-    // View Single Room
-    .addSubcommand(subcommand =>
-        subcommand
+    .addSubcommandGroup(group =>
+        group
             .setName('view')
-            .setDescription('View a single room')
+            .setDescription('View room information')
+            // View All Rooms
+            .addSubcommand(subcommand =>
+                subcommand
+                    .setName('all')
+                    .setDescription('View all rooms')
+            )
+            // View Single Room
+            .addSubcommand(subcommand =>
+                subcommand
+                    .setName('view')
+                    .setDescription('View a single room')
+                    .addStringOption((option) =>
+                        option
+                            .setName('name')
+                            .setDescription('The name of the room to view')
+                            .setRequired(true))
+            )
+    )
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName('ping')
+            .setDescription('Ping all members of a room')
             .addStringOption((option) =>
                 option
                     .setName('name')
-                    .setDescription('The name of the room to view')
+                    .setDescription('The name of the room to ping')
                     .setRequired(true))
+            .addStringOption((option) =>
+                option
+                    .setName('message')
+                    .setDescription('Message to include with the ping')
+                    .setRequired(false))
     )
     // Clear Rooms
     .addSubcommand(subcommand =>
@@ -245,6 +265,37 @@ async function LeaveRoom(interaction) {
     return outcome;
 }
 
+async function PingRoom(interaction) {
+    RefreshAppData();
+    const GUILD_ID = interaction.guildId;
+    const USER_ID = interaction.user.id;
+    const NAME = interaction.options.getString('name');
+    const MESSAGE = interaction.options.getString('message') || '';
+
+    const room = appData.rooms.find(room => room.name.toLowerCase() === NAME.toLowerCase() && room.guildId === GUILD_ID);
+
+    if (!room) {
+        await interaction.reply({ content: `> # Room *${NAME}* does not exist.`, ephemeral: true });
+        return;
+    }
+
+    const denyPings = appData.denyPings || [];
+
+    room.members = room.members.filter(member => !denyPings.includes(member));
+
+    if (room.members.length === 0) {
+        await interaction.reply({ content: `> ## Room *${NAME}* has no members to ping.`, ephemeral: true });
+        return;
+    }
+    
+    const mentions = room.members.map(id => `<@${id}>`).join(' ');
+    let content = `> ## Members of *${room.name}*:\n> ${mentions}`
+    content += MESSAGE != '' ? `\n> ## ${MESSAGE}` : '';
+
+    await interaction.reply({ content: content, allowedMentions: { users: room.members } });
+
+}
+
 async function ClearRooms(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
@@ -293,6 +344,11 @@ module.exports = {
                 content: result,
                 allowedMentions: { parse: [] }
             })
+            return;
+        }
+
+        if (subcommand === 'ping') {
+            await PingRoom(interaction);
             return;
         }
 

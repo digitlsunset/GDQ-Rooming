@@ -48,22 +48,26 @@ let appData = require('../data.json');
                     .setDescription('The name of the group to leave')
                     .setRequired(false))
     )
-    // View All Groups
-    .addSubcommand(subcommand =>
-        subcommand
-            .setName('all')
-            .setDescription('View all groups')
-    )
-    // View Single Group
-    .addSubcommand(subcommand =>
-        subcommand
+    .addSubcommandGroup(group =>
+        group
             .setName('view')
-            .setDescription('View a single group')
-            .addStringOption((option) =>
-                option
-                    .setName('name')
-                    .setDescription('The name of the group to view')
-                    .setRequired(true))
+            .setDescription('View group information')
+            .addSubcommand(subcommand =>
+                subcommand
+                    .setName('all')
+                    .setDescription('View all groups')
+            )
+            .addSubcommand(subcommand =>
+                subcommand
+                    .setName('single')
+                    .setDescription('View a single group')
+                    .addStringOption(option =>
+                        option
+                            .setName('name')
+                            .setDescription('The group to view')
+                            .setRequired(false)
+                    )
+            )
     )
     // Ping Group
     .addSubcommand(subcommand =>
@@ -259,8 +263,21 @@ async function PingGroup(interaction) {
     //     return `> ## Group *${GROUP_NAME}* has no other members to ping.`;
     // }
 
+    const denyPings = appData.denyPings || [];
+
+    group.members = group.members.filter(member => !denyPings.includes(member));
+
+    if (group.members.length === 0) {
+        return {
+            content: `> ## Group *${GROUP_NAME}* has no members to ping.`,
+            allowedMentions: { parse: [] },
+            ephemeral: true
+        }
+    }
+
     const mentions = group.members.map(id => `<@${id}>`).join(' ');
-    const content = `> ## Members of *${group.name}*:\n> ${mentions}\n> ## ${MESSAGE}`;
+    let content = `> ## Members of *${group.name}*:\n> ${mentions}`
+    content += MESSAGE != '' ? `\n> ## ${MESSAGE}` : '';
 
     // Return an object so the caller can use the proper allowedMentions to actually ping the users
     return {

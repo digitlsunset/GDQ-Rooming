@@ -5,11 +5,31 @@ let appData = require('../data.json');
 const data = new SlashCommandBuilder()
     .setName('user')
     .setDescription('See user data')
-    .addUserOption(option =>
-        option
-            .setName('target')
-            .setDescription('The user to view')
-            .setRequired(false)
+    .addSubcommandGroup(group =>
+        group
+            .setName('view')
+            .setDescription('View user information')
+            .addSubcommand(subcommand =>
+                subcommand
+                    .setName('all')
+                    .setDescription('View all user data')
+            )
+            .addSubcommand(subcommand =>
+                subcommand
+                    .setName('single')
+                    .setDescription('View user info')
+                    .addUserOption(option =>
+                        option
+                            .setName('target')
+                            .setDescription('The user to view')
+                            .setRequired(false)
+                    )
+            )
+    )
+    .addSubcommand(subcommand =>
+        subcommand
+            .setName('toggle-pings')
+            .setDescription('Toggle whether you want to be pinged when someone uses the ping commands with this app')
     );
 
 async function RefreshAppData() {
@@ -62,9 +82,48 @@ async function ViewUser(interaction) {
     await interaction.reply({ embeds: [exampleEmbed] });
 }
 
+async function TogglePings(interaction) {
+    RefreshAppData();
+    const USER_ID = interaction.user.id;
+    const denyUser = appData.denyPings.find(user => user === USER_ID);
+
+    if (!denyUser) {
+        appData.denyPings.push(USER_ID);
+    } else {
+        appData.denyPings = appData.denyPings.filter(user => user !== USER_ID);
+    }
+
+    fs.writeFileSync('./data.json', JSON.stringify(appData, null, 2));
+
+    await interaction.reply({ content: `You have ${denyUser ? 'enabled' : 'disabled'} pings.`, ephemeral: true });
+}
+
 module.exports = {
 	data: data,
 	async execute(interaction) {
-        await ViewUser(interaction);
+        const subcommand = interaction.options.getSubcommand();
+
+        if (subcommand === 'single') {
+            const result = await ViewUser(interaction);
+            await interaction.reply({
+                content: result,
+                allowedMentions: { parse: [] }
+            })
+            return;
+        }
+
+        if (subcommand === 'all') {
+            const result = await ViewUser(interaction);
+            await interaction.reply({
+                content: result,
+                allowedMentions: { parse: [] }
+            })
+            return;
+        }
+
+        if (subcommand === 'toggle-pings') {
+            await TogglePings(interaction);
+            return;
+        }
 	},
 };

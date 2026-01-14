@@ -1,120 +1,161 @@
 {
-    "templates": {
-        "room": {
-            "id": 0,
-            "guildId": 0,
-            "name": "Default Room",
-            "roomNumber": "N/A",
-            "maxSize": null,
-            "members": []
-        },
-        "group": {
-            "id": 0,
-            "guildId": 0,
-            "name": "Default Group",
-            "startTime": 0,
-            "status": {
-                "Unknown": null,
-                "Planned": 0,
-                "Ongoing": 1,
-                "Completed": 2
-            },
-            "duration": null,
-            "members": []
-        },
-        "run": {
-            "id": 0,
-            "guildId": 0,
-            "name": "Default Run",
-            "category": "Default Category",
-            "startTime": null,
-            "duration": " ",
-            "status": {
-                "Unknown": null,
-                "Planned": 0,
-                "Ongoing": 1,
-                "Completed": 2
-            },
-            "members": []
-        },
-        "hotspot": {
-            "id": 0,
-            "guildId": 0,
-            "name": "Default Hotspot",
-            "type": {
-                "Unknown": null,
-                "Restaurant": 0,
-                "Cafe": 1,
-                "Bar": 2,
-                "Sports": 3
-            },
-            "URL": null,
-            "Address": null,
-            "members": []
-        }
+  "templates": {
+    "room": {
+      "id": 0,
+      "guildId": 0,
+      "name": "Default Room",
+      "roomNumber": "N/A",
+      "maxSize": null,
+      "members": []
     },
-    "rooms": [
-        {
-            "id": 0,
-            "guildId": "1028207093594984549",
-            "name": "B",
-            "roomNumber": "N/A",
-            "maxSize": 4,
-            "members": [
-                "401915946446487584"
-            ]
-        }
-    ],
-    "groups": [
-        {
-            "id": 0,
-            "guildId": "1028207093594984549",
-            "name": "Escape Room",
-            "startTime": "1769036400",
-            "status": null,
-            "duration": 5,
-            "members": [
-                "401915946446487584"
-            ]
-        }
-    ],
-    "runs": [
-        {
-            "id": 1,
-            "guildId": "1091809778860302366",
-            "name": "Super Mario 64",
-            "category": "120 Star",
-            "startTime": "2026-07-11T21:00-06:00",
-            "duration": "PT1H40M",
-            "status": 0,
-            "members": [
-                "138667796006436864"
-            ]
-        },
-        {
-            "id": 0,
-            "guildId": "1028207093594984549",
-            "name": "Road Trip",
-            "category": "Any% NMG",
-            "startTime": "1769036400",
-            "duration": "in 1 hours and 40 minutes",
-            "status": null,
-            "members": [
-                "401915946446487584"
-            ]
-        }
-    ],
-    "hotspots": [
-        {
-            "id": 1,
-            "guildId": "1091809778860302366",
-            "name": "Caribou Coffee",
-            "type": 1,
-            "URL": "https://www.cariboucoffee.com",
-            "Address": "509 Washington Ave S, Minneapolis, MN 55415",
-            "members": [
-                "138667796006436864"
-            ]
-        }
-    ]
+    "group": {
+      "id": 0,
+      "guildId": 0,
+      "name": "Default Group",
+      "startTime": 0,
+      "status": {
+        "Unknown": null,
+        "Planned": 0,
+        "Ongoing": 1,
+        "Completed": 2
+      },
+      "duration": null,
+      "members": []
+    },
+    "run": {
+      "id": 0,
+      "guildId": 0,
+      "name": "Default Run",
+      "category": "Default Category",
+      "startTime": null,
+      "duration": " ",
+      "status": {
+        "Unknown": null,
+        "Planned": 0,
+        "Ongoing": 1,
+        "Completed": 2
+      },
+      "members": []
+    },
+    "hotspot": {
+      "id": 0,
+      "guildId": 0,
+      "name": "Default Hotspot",
+      "type": {
+        "Unknown": null,
+        "Restaurant": 0,
+        "Cafe": 1,
+        "Bar": 2,
+        "Sports": 3
+      },
+      "URL": null,
+      "Address": null,
+      "members": []
+    }
+  },
+  "denyPings": [
+    "138667796006436864"
+  ],
+  "rooms": [
+    {
+      "id": 0,
+      "guildId": "1028207093594984549",
+      "name": "B",
+      "roomNumber": "N/A",
+      "maxSize": 4,
+      "members": [
+        "401915946446487584"
+      ]
+    },
+    {
+      "id": 0,
+      "guildId": "1091809778860302366",
+      "name": "A to Z(oo)",
+      "roomNumber": "1242",
+      "maxSize": 4,
+      "members": [
+        "138667796006436864"
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": 0,
+      "guildId": "1028207093594984549",
+      "name": "Escape Room",
+      "startTime": "1769036400",
+      "status": null,
+      "duration": 5,
+      "members": [
+        "401915946446487584"
+      ]
+    },
+    {
+      "id": 0,
+      "guildId": "1091809778860302366",
+      "name": "Twins",
+      "startTime": null,
+      "status": null,
+      "duration": null,
+      "members": [
+        "138667796006436864"
+      ]
+    }
+  ],
+  "runs": [
+    {
+      "id": 1,
+      "guildId": "1091809778860302366",
+      "name": "Super Mario 64",
+      "category": "120 Star",
+      "startTime": "2026-07-11T21:00-06:00",
+      "duration": "PT1H40M",
+      "status": 0,
+      "members": [
+        "138667796006436864"
+      ]
+    },
+    {
+      "id": 0,
+      "guildId": "1028207093594984549",
+      "name": "Road Trip",
+      "category": "Any% NMG",
+      "startTime": "1769036400",
+      "duration": "in 1 hours and 40 minutes",
+      "status": null,
+      "members": [
+        "401915946446487584"
+      ]
+    }
+  ],
+  "hotspots": [
+    {
+      "id": 1,
+      "guildId": "1091809778860302366",
+      "name": "Caribou Coffee",
+      "type": 1,
+      "url": "https://www.cariboucoffee.com",
+      "address": "509 Washington Ave S, Minneapolis, MN 55415",
+      "members": [
+        "138667796006436864"
+      ]
+    },
+    {
+      "id": 0,
+      "guildId": "1091809778860302366",
+      "name": "The Cafe Meow",
+      "type": {
+        "Unknown": null,
+        "Restaurant": 0,
+        "Cafe": 1,
+        "Bar": 2,
+        "Sports": 3
+      },
+      "members": [
+        "138667796006436864"
+      ],
+      "url": "https://thecafemeow.com/",
+      "address": "1718A Lexington Ave N, Roseville, MN 55113"
+    }
+  ]
 }
