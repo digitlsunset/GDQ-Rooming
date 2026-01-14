@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs');
 let appData = require('../data.json');
 
@@ -12,7 +12,7 @@ let appData = require('../data.json');
             .setDescription('Create a group for people to join.')
             .addStringOption((option) =>
                 option
-                    .setName('name')
+                    .setName('group')
                     .setDescription('The name of the group to create')
                     .setRequired(true))
             .addStringOption((option) =>
@@ -33,9 +33,10 @@ let appData = require('../data.json');
             .setDescription('Join a group')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the group to join')
-                    .setRequired(true))
+                    .setName('group')
+                    .setDescription('The group to join')
+                    .setRequired(true)
+                    .setAutocomplete(true))
     )
     // Leave Group
     .addSubcommand(subcommand =>
@@ -44,9 +45,10 @@ let appData = require('../data.json');
             .setDescription('Leave a group')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the group to leave')
-                    .setRequired(false))
+                    .setName('group')
+                    .setDescription('The group to leave')
+                    .setRequired(false)
+                    .setAutocomplete(true))
     )
     .addSubcommandGroup(group =>
         group
@@ -63,9 +65,10 @@ let appData = require('../data.json');
                     .setDescription('View a single group')
                     .addStringOption(option =>
                         option
-                            .setName('name')
+                            .setName('group')
                             .setDescription('The group to view')
-                            .setRequired(false)
+                            .setRequired(true)
+                            .setAutocomplete(true)
                     )
             )
     )
@@ -76,9 +79,10 @@ let appData = require('../data.json');
             .setDescription('Ping all members of a group')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the group to ping')
-                    .setRequired(true))
+                    .setName('group')
+                    .setDescription('The group to ping')
+                    .setRequired(true)
+                    .setAutocomplete(true))
             .addStringOption((option) =>
                 option
                     .setName('message')
@@ -107,7 +111,7 @@ async function CreateGroup(interaction) {
 
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const NAME = interaction.options.getString('name');
+    const NAME = interaction.options.getString('group');
     const SIZE = interaction.options.getInteger('size');
     const template = {...appData.templates.group};
 
@@ -140,7 +144,7 @@ async function ViewGroups(interaction) {
 
     let groups = appData.groups.filter(group => group.guildId === GUILD_ID);
     if (interaction.options.getSubcommand() === 'view') {
-        const GROUP_NAME = interaction.options.getString('name');
+        const GROUP_NAME = interaction.options.getString('group');
         groups = groups.filter(group => group.name === GROUP_NAME);
     }
 
@@ -172,7 +176,7 @@ async function JoinGroup(interaction) {
 
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const GROUP_NAME = interaction.options.getString('name');
+    const GROUP_NAME = interaction.options.getString('group');
 
     const group = appData.groups.find(group => group.guildId === GUILD_ID && group.name === GROUP_NAME);
 
@@ -199,7 +203,7 @@ async function LeaveGroup(interaction) {
 
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    let GROUP_NAME = interaction.options.getString('name');
+    let GROUP_NAME = interaction.options.getString('group');
     let group = null;
     
     if (GROUP_NAME) {
@@ -249,7 +253,7 @@ async function PingGroup(interaction) {
     RefreshAppData();
 
     const GUILD_ID = interaction.guildId;
-    const GROUP_NAME = interaction.options.getString('name');
+    const GROUP_NAME = interaction.options.getString('group');
     const MESSAGE = interaction.options.getString('message') || '';
 
     const group = appData.groups.find(group => group.guildId === GUILD_ID && group.name === GROUP_NAME);
@@ -258,14 +262,18 @@ async function PingGroup(interaction) {
         return `> ## Group *${GROUP_NAME}* does not exist.`;
     }
 
-    // Un-comment later
-    // if (group.members.length === 1) {
-    //     return `> ## Group *${GROUP_NAME}* has no other members to ping.`;
-    // }
-
     const denyPings = appData.denyPings || [];
 
     group.members = group.members.filter(member => !denyPings.includes(member));
+
+    // Un-comment later
+    // if (group.members.length === 1 && group.members[0] === USER_ID) {
+    //     return {
+    //         content: `> ## Group *${GROUP_NAME}* has no members to ping.`,
+    //         allowedMentions: { parse: [] },
+    //         ephemeral: true
+    //     }
+    // }
 
     if (group.members.length === 0) {
         return {
@@ -360,4 +368,16 @@ module.exports = {
             return;
         }
 	},
+    async autocomplete(interaction) {
+        RefreshAppData();
+        const OPTION = interaction.options.getFocused(true);
+        const VALUE = OPTION.value;
+        const GUILD_ID = interaction.guildId;
+
+        const groups = appData.groups
+            .filter(group => group.guildId === GUILD_ID && group.name.toLowerCase().startsWith(VALUE.toLowerCase()))
+            .map((group) => ({ name: group.name, value: group.name }));
+
+        await interaction.respond(groups.slice(0, 25));
+    }
 };

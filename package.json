@@ -1,7 +1,7 @@
 {
   "name": "rooming",
-  "version": "1.0.0",
-  "description": "An app to handle rooming situations for CHxGDQ events",
+  "version": "1.1.0",
+  "description": "An app to handle rooming situations and other data types for CHxGDQ events",
   "license": "ISC",
   "author": "DigitlSunset, AtomicGH",
   "type": "commonjs",

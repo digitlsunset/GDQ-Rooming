@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs');
 let appData = require('../data.json');
 
@@ -12,7 +12,7 @@ let appData = require('../data.json');
             .setDescription('Upload a speedrun on the schedule you are interested in seeing')
             .addStringOption((option) =>
                 option
-                    .setName('name')
+                    .setName('run')
                     .setDescription('The name of the run')
                     .setRequired(true))
             .addStringOption((option) =>
@@ -38,9 +38,10 @@ let appData = require('../data.json');
             .setDescription('Show interest in a run others want to see')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the run to join')
-                    .setRequired(true))
+                    .setName('run')
+                    .setDescription('The run to join')
+                    .setRequired(true)
+                    .setAutocomplete(true))
     )
     // Leave Group
     .addSubcommand(subcommand =>
@@ -49,27 +50,35 @@ let appData = require('../data.json');
             .setDescription('Remove interest in a run')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the run to leave')
-                    .setRequired(true))
+                    .setName('run')
+                    .setDescription('The run to leave')
+                    .setRequired(true)
+                    .setAutocomplete(true))
     )
-    // View All Groups
-    .addSubcommand(subcommand =>
-        subcommand
-            .setName('all')
-            .setDescription('View all runs that people have shown interest in')
-    )
-    // View Single Group
-    .addSubcommand(subcommand =>
-        subcommand
+    .addSubcommandGroup(group =>
+        group
             .setName('view')
-            .setDescription('View a single run people have shown interest in')
-            .addStringOption((option) =>
-                option
-                    .setName('name')
-                    .setDescription('The name of the run to view')
-                    .setRequired(true))
+            .setDescription('View run information')
+            // View All Groups
+            .addSubcommand(subcommand =>
+                subcommand
+                    .setName('all')
+                    .setDescription('View all runs that people have shown interest in')
+            )
+            // View Single Group
+            .addSubcommand(subcommand =>
+                subcommand
+                    .setName('single')
+                    .setDescription('View a single run people have shown interest in')
+                    .addStringOption((option) =>
+                        option
+                            .setName('run')
+                            .setDescription('The run to view')
+                            .setRequired(true)
+                            .setAutocomplete(true))
+            )
     )
+    
     // Ping Group
     .addSubcommand(subcommand =>
         subcommand
@@ -77,9 +86,10 @@ let appData = require('../data.json');
             .setDescription('Ping all members of a run of interest')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the run to ping')
-                    .setRequired(true))
+                    .setName('run')
+                    .setDescription('The run to ping')
+                    .setRequired(true)
+                    .setAutocomplete(true))
             .addStringOption((option) =>
                 option
                     .setName('message')
@@ -108,7 +118,7 @@ async function CreateRun(interaction) {
 
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const NAME = interaction.options.getString('name');
+    const NAME = interaction.options.getString('run');
     const CATEGORY = interaction.options.getString('category');
     const template = {...appData.templates.run};
 
@@ -144,8 +154,8 @@ async function ViewRuns(interaction) {
     const GUILD_ID = interaction.guildId;
 
     let runs = appData.runs.filter(run => run.guildId === GUILD_ID);
-    if (interaction.options.getSubcommand() === 'view') {
-        const RUN_NAME = interaction.options.getString('name');
+    if (interaction.options.getSubcommand() === 'single') {
+        const RUN_NAME = interaction.options.getString('run');
         runs = runs.filter(run => run.name === RUN_NAME);
     }
 
@@ -174,7 +184,7 @@ async function JoinRun(interaction) {
 
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const RUN_NAME = interaction.options.getString('name');
+    const RUN_NAME = interaction.options.getString('run');
 
     const run = appData.runs.find(run => run.guildId === GUILD_ID && run.name === RUN_NAME);
 
@@ -197,7 +207,7 @@ async function LeaveRun(interaction) {
 
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    let RUN_NAME = interaction.options.getString('name');
+    let RUN_NAME = interaction.options.getString('run');
     let run = null;
 
     if (RUN_NAME) {
@@ -245,9 +255,9 @@ async function LeaveRun(interaction) {
 
 async function PingRun(interaction) {
     RefreshAppData();
-
+    const USER_ID = interaction.user.id;
     const GUILD_ID = interaction.guildId;
-    const RUN_NAME = interaction.options.getString('name');
+    const RUN_NAME = interaction.options.getString('run');
     const MESSAGE = interaction.options.getString('message') || '';
 
     const run = appData.runs.find(run => run.guildId === GUILD_ID && run.name === RUN_NAME);
@@ -257,7 +267,7 @@ async function PingRun(interaction) {
     }
 
     // Un-comment later
-    // if (run.members.length === 1) {
+    // if (run.members.length === 1 && run.members[0] === USER_ID) {
     //     return `> ## Run *${RUN_NAME}* has no other members to ping.`;
     // }
 
@@ -296,7 +306,7 @@ module.exports = {
             return;
         }
 
-        if (subcommand === 'all' || subcommand === 'view') {
+        if (subcommand === 'all' || subcommand === 'single') {
             const result = await ViewRuns(interaction);
             await interaction.reply({
                 content: result,
@@ -345,4 +355,16 @@ module.exports = {
             return;
         }
 	},
+    async autocomplete(interaction) {
+        RefreshAppData();
+        const OPTION = interaction.options.getFocused(true);
+        const VALUE = OPTION.value;
+        const GUILD_ID = interaction.guildId;
+
+        const runs = appData.runs
+            .filter(run => run.guildId === GUILD_ID && run.name.toLowerCase().startsWith(VALUE.toLowerCase()))
+            .map((run) => ({ name: run.name, value: run.name }));
+
+        await interaction.respond(runs.slice(0, 25));
+    }
 };

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs');
 let appData = require('../data.json');
 
@@ -12,7 +12,7 @@ const data = new SlashCommandBuilder()
             .setDescription('Create a room for people to join.')
             .addStringOption((option) =>
                 option
-                    .setName('name')
+                    .setName('room')
                     .setDescription('The name of the room to create')
                     .setRequired(true))
             .addStringOption((option) =>
@@ -33,9 +33,10 @@ const data = new SlashCommandBuilder()
             .setDescription('Join a room')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the room to join')
-                    .setRequired(true))
+                    .setName('room')
+                    .setDescription('The room to join')
+                    .setRequired(true)
+                    .setAutocomplete(true))
     )
     // Leave Room
     .addSubcommand(subcommand =>
@@ -44,9 +45,10 @@ const data = new SlashCommandBuilder()
             .setDescription('Leave a room')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the room to leave')
-                    .setRequired(false))
+                    .setName('room')
+                    .setDescription('The room to leave')
+                    .setRequired(false)
+                    .setAutocomplete(true))
     )
     .addSubcommandGroup(group =>
         group
@@ -65,9 +67,10 @@ const data = new SlashCommandBuilder()
                     .setDescription('View a single room')
                     .addStringOption((option) =>
                         option
-                            .setName('name')
-                            .setDescription('The name of the room to view')
-                            .setRequired(true))
+                            .setName('room')
+                            .setDescription('The room to view')
+                            .setRequired(true)
+                            .setAutocomplete(true))
             )
     )
     .addSubcommand(subcommand =>
@@ -76,9 +79,10 @@ const data = new SlashCommandBuilder()
             .setDescription('Ping all members of a room')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the room to ping')
-                    .setRequired(true))
+                    .setName('room')
+                    .setDescription('The room to ping')
+                    .setRequired(true)
+                    .setAutocomplete(true))
             .addStringOption((option) =>
                 option
                     .setName('message')
@@ -150,7 +154,7 @@ async function ViewRooms(interaction) {
     let rooms = appData.rooms.filter(room => room.guildId === GUILD_ID);
 
     if (interaction.options.getSubcommand() === 'view') {
-        const ROOM_NAME = interaction.options.getString('name');
+        const ROOM_NAME = interaction.options.getString('room');
         rooms = rooms.filter(room => room.name === ROOM_NAME);
     }
 
@@ -178,7 +182,7 @@ async function JoinRoom(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const ROOM_NAME = interaction.options.getString('name');
+    const ROOM_NAME = interaction.options.getString('room');
 
     let fail = null;
 
@@ -218,7 +222,7 @@ async function LeaveRoom(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    let ROOM_NAME = interaction.options.getString('name');
+    let ROOM_NAME = interaction.options.getString('room');
     let room = null;
     
     if (ROOM_NAME) {
@@ -269,7 +273,7 @@ async function PingRoom(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const NAME = interaction.options.getString('name');
+    const NAME = interaction.options.getString('room');
     const MESSAGE = interaction.options.getString('message') || '';
 
     const room = appData.rooms.find(room => room.name.toLowerCase() === NAME.toLowerCase() && room.guildId === GUILD_ID);
@@ -282,6 +286,11 @@ async function PingRoom(interaction) {
     const denyPings = appData.denyPings || [];
 
     room.members = room.members.filter(member => !denyPings.includes(member));
+
+    // Un-comment later
+    // if (room.members.length === 1 && room.members[0] === USER_ID) {
+    //     await interaction.reply({ content: `> ## Room *${NAME}* has no other members to ping.`, allowedMentions: { parse: [] } });
+    // }
 
     if (room.members.length === 0) {
         await interaction.reply({ content: `> ## Room *${NAME}* has no members to ping.`, ephemeral: true });
@@ -296,6 +305,7 @@ async function PingRoom(interaction) {
 
 }
 
+// Remove later
 async function ClearRooms(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
@@ -324,7 +334,8 @@ module.exports = {
             const result = await ViewRooms(interaction);
             await interaction.reply({
                 content: result,
-                allowedMentions: { parse: [] }
+                allowedMentions: { parse: [] },
+                ephemeral: true
             })
             return;
         }
@@ -362,4 +373,16 @@ module.exports = {
             return;
         }
 	},
+    async autocomplete(interaction) {
+        RefreshAppData();
+        const OPTION = interaction.options.getFocused(true);
+        const VALUE = OPTION.value;
+        const GUILD_ID = interaction.guildId;
+
+        const rooms = appData.rooms
+            .filter(room => room.guildId === GUILD_ID && room.name.toLowerCase().startsWith(VALUE.toLowerCase()))
+            .map((room) => ({ name: room.name, value: room.name }));
+
+        await interaction.respond(rooms.slice(0, 25));
+    }
 };

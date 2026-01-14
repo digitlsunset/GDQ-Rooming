@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, Client, GatewayIntentBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs');
 let appData = require('../data.json');
 
@@ -79,6 +79,44 @@ async function ViewUser(interaction) {
         { name: 'Groups:', value: userGroups.length ? userGroups.join('\n') : 'None', inline: true },
     );
 
+    await interaction.reply({ embeds: [exampleEmbed], ephemeral: true });
+}
+
+async function ViewAll(interaction) {
+    RefreshAppData();
+    // console.log(interaction);
+    console.log(await interaction.guild.roles.fetch());
+
+    const roles = await interaction.guild.roles.fetch();
+    const members = await interaction.guild.members.fetch();
+    let exampleEmbed = new EmbedBuilder()
+        .setColor(0x0099FF)
+        .setTitle('CH x GDQ User Data')
+        .setTimestamp()
+        .setThumbnail('https://avatars.githubusercontent.com/u/10563385?s=200&v=4')
+        .setFooter({ text: 'CH x GDQ', iconURL: 'https://avatars.githubusercontent.com/u/10563385?s=200&v=4' });
+    ;
+    
+    roles.forEach(role => {
+        if (role.name === '@everyone') return;
+        let roleMembers = [];
+        members.forEach(member => {
+            if (member.roles.cache.has(role.id)) {
+                roleMembers.push(member.user.globalName ? member.user.globalName : member.user.username);
+            }
+        });
+
+        if (roleMembers.length === 0) {
+            exampleEmbed.addFields(
+                { name: role.name, value: 'None', inline: true },
+            );
+        } else {
+            exampleEmbed.addFields(
+                { name: role.name, value: roleMembers.join('\n'), inline: true },
+            );
+        }
+    });
+
     await interaction.reply({ embeds: [exampleEmbed] });
 }
 
@@ -113,11 +151,7 @@ module.exports = {
         }
 
         if (subcommand === 'all') {
-            const result = await ViewUser(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] }
-            })
+            const result = await ViewAll(interaction);
             return;
         }
 

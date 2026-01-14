@@ -12,7 +12,7 @@ const data = new SlashCommandBuilder()
             .setDescription('Create a hotspot for people to join.')
             .addStringOption((option) =>
                 option
-                    .setName('name')
+                    .setName('hotspot')
                     .setDescription('The name of the hotspot to create')
                     .setRequired(true))
             .addStringOption((option) =>
@@ -33,9 +33,10 @@ const data = new SlashCommandBuilder()
             .setDescription('Join a hotspot')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the hotspot to join')
-                    .setRequired(true))
+                    .setName('hotspot')
+                    .setDescription('The hotspot to join')
+                    .setRequired(true)
+                    .setAutocomplete(true))
     )
     // Leave Hotspot
     .addSubcommand(subcommand =>
@@ -44,9 +45,10 @@ const data = new SlashCommandBuilder()
             .setDescription('Leave a hotspot')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the hotspot to leave')
-                    .setRequired(false))
+                    .setName('hotspot')
+                    .setDescription('The hotspot to leave')
+                    .setRequired(false)
+                    .setAutocomplete(true))
     )
     .addSubcommandGroup(group =>
         group
@@ -63,9 +65,10 @@ const data = new SlashCommandBuilder()
                     .setDescription('View a single hotspot')
                     .addStringOption(option =>
                         option
-                            .setName('name')
+                            .setName('hotspot')
                             .setDescription('The hotspot to view')
-                            .setRequired(false)
+                            .setRequired(true)
+                            .setAutocomplete(true)
                     )
             )
     )
@@ -76,9 +79,10 @@ const data = new SlashCommandBuilder()
             .setDescription('Ping all members of a hotspot')
             .addStringOption((option) =>
                 option
-                    .setName('name')
-                    .setDescription('The name of the hotspot to ping')
-                    .setRequired(true))
+                    .setName('hotspot')
+                    .setDescription('The hotspot to ping')
+                    .setRequired(true)
+                    .setAutocomplete(true))
             .addStringOption((option) =>
                 option
                     .setName('message')
@@ -106,9 +110,9 @@ async function CreateHotspot(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const NAME = interaction.options.getString('name');
-    let URL = interaction.options.getString('URL');
-    const ADDR = interaction.options.getString('Address');
+    const NAME = interaction.options.getString('hotspot');
+    let URL = interaction.options.getString('url');
+    const ADDR = interaction.options.getString('address');
 
     // Check if hotspot already exists
     const existingHotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase());
@@ -138,7 +142,7 @@ async function JoinHotspot(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const NAME = interaction.options.getString('name');
+    const NAME = interaction.options.getString('hotspot');
 
     const hotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID);
 
@@ -163,7 +167,7 @@ async function LeaveHotspot(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const NAME = interaction.options.getString('name');
+    const NAME = interaction.options.getString('hotspot');
 
     const hotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID);
 
@@ -187,7 +191,7 @@ async function LeaveHotspot(interaction) {
 async function ViewHotspot(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
-    const NAME = interaction.options.getString('name');
+    const NAME = interaction.options.getString('hotspot');
 
     let hotspots = appData.hotspots.filter(hotspot => hotspot.guildId === GUILD_ID);
 
@@ -214,14 +218,14 @@ async function ViewHotspot(interaction) {
         hotspotList += '\n';
     });
 
-    await interaction.reply({ content: hotspotList, allowedMentions: { parse: [] } });
+    await interaction.reply({ content: hotspotList, allowedMentions: { parse: [] }, ephemeral: true });
 }
 
 async function PingHotspot(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const NAME = interaction.options.getString('name');
+    const NAME = interaction.options.getString('hotspot');
     const MESSAGE = interaction.options.getString('message') || '';
 
     const hotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID);
@@ -234,6 +238,11 @@ async function PingHotspot(interaction) {
     const denyPings = appData.denyPings || [];
 
     hotspot.members = hotspot.members.filter(member => !denyPings.includes(member));
+
+    // Un-comment later
+    // if (hotspot.members.length === 1 && hotspot.members[0] === USER_ID) {
+    //     await interaction.reply({ content: `> ## Hotspot *${NAME}* has no other members to ping.`, allowedMentions: { parse: [] } });
+    // }
 
     if (hotspot.members.length === 0) {
         await interaction.reply({ content: `> ## Hotspot *${NAME}* has no members to ping.`, ephemeral: true });
@@ -275,4 +284,16 @@ module.exports = {
         }
         await interaction.reply('Hotspot command is under construction.');
     },
+    async autocomplete(interaction) {
+        RefreshAppData();
+        const OPTION = interaction.options.getFocused(true);
+        const VALUE = OPTION.value;
+        const GUILD_ID = interaction.guildId;
+
+        const hotspots = appData.hotspots
+            .filter(hotspot => hotspot.guildId === GUILD_ID && hotspot.name.toLowerCase().startsWith(VALUE.toLowerCase()))
+            .map((hotspot) => ({ name: hotspot.name, value: hotspot.name }));
+
+        await interaction.respond(hotspots.slice(0, 25));
+    }
 };
