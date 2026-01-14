@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "An app to handle rooming situations for CHxGDQ events",
   "license": "ISC",
-  "author": "DigitlSunset",
+  "author": "DigitlSunset, AtomicGH",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
