@@ -99,6 +99,8 @@ async function ViewAll(interaction) {
     
     roles.forEach(role => {
         if (role.name === '@everyone') return;
+        if (role.name === 'Testing-Jack') return;
+        if (role.name === 'Rooming') return;
         let roleMembers = [];
         members.forEach(member => {
             if (member.roles.cache.has(role.id)) {
