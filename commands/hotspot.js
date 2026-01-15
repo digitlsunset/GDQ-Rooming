@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 const fs = require('fs');
 let appData = require('../data.json');
 
@@ -113,19 +113,13 @@ async function CreateHotspot(interaction) {
     const NAME = interaction.options.getString('hotspot');
     let URL = interaction.options.getString('url');
     const ADDR = interaction.options.getString('address');
-    const template = {...appData.templates.hotspot};
-
-    appData.hotspots.forEach(hotspot => {
-        if (hotspot.guildId === GUILD_ID && hotspot.id >= template.id)
-            template.id = hotspot.id + 1;
-    });
-
 
     // Check if hotspot already exists
     const existingHotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase());
 
     if (existingHotspot) {
-        return { content: `> # A hotspot with the name "${NAME}" already exists. Please choose a different name.`, flags: MessageFlags.Ephemeral };
+        await interaction.reply({ content: `> # A hotspot with the name "${NAME}" already exists. Please choose a different name.`, ephemeral: true });
+        return;
     }
 
     // Create new hotspot object
@@ -141,7 +135,7 @@ async function CreateHotspot(interaction) {
     
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
 
-    return `> ## Interest in hotspot *${NAME}* has been created.`;
+    await interaction.reply({ content: `> # Hotspot *${NAME}* created!` })
 };
 
 async function JoinHotspot(interaction) {
@@ -153,18 +147,20 @@ async function JoinHotspot(interaction) {
     const hotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID);
 
     if (!hotspot) {
-        return { content: `> # Hotspot *${NAME}* does not exist.`, flags: MessageFlags.Ephemeral };
+        await interaction.reply({ content: `> # Hotspot *${NAME}* does not exist.`, ephemeral: true });
+        return;
     }
 
     if (hotspot.members.includes(USER_ID)) {
-        return { content: `> # You are already a member of hotspot *${NAME}*.`, flags: MessageFlags.Ephemeral };
+        await interaction.reply({ content: `> # You are already a member of hotspot *${NAME}*.`, ephemeral: true });
+        return;
     }
 
     appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID).members.push(USER_ID);
     
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
 
-    return { content: `> # <@${USER_ID}> joined hotspot *${NAME}*.` , allowedMentions: { parse: [] }};
+    await interaction.reply({ content: `> # <@${USER_ID}> joined hotspot *${NAME}*.` , allowedMentions: { parse: [] }});
 }
 
 async function LeaveHotspot(interaction) {
@@ -176,18 +172,20 @@ async function LeaveHotspot(interaction) {
     const hotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID);
 
     if (!hotspot) {
-        return { content: `> # Hotspot *${NAME}* does not exist.`, flags: MessageFlags.Ephemeral };
+        await interaction.reply({ content: `> # Hotspot *${NAME}* does not exist.`, ephemeral: true });
+        return;
     }
 
     if (!hotspot.members.includes(USER_ID)) {
-        return { content: `> # You are not a member of hotspot *${NAME}*.`, flags: MessageFlags.Ephemeral };
+        await interaction.reply({ content: `> # You are not a member of hotspot *${NAME}*.`, ephemeral: true });
+        return;
     }
 
     appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID).members = hotspot.members.filter(member => member !== USER_ID);
     
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
 
-    return { content: `> # <@${USER_ID}> left hotspot *${NAME}*.` , allowedMentions: { parse: [] }};
+    await interaction.reply({ content: `> # <@${USER_ID}> left hotspot *${NAME}*.` , allowedMentions: { parse: [] }});
 }
 
 async function ViewHotspot(interaction) {
@@ -202,7 +200,8 @@ async function ViewHotspot(interaction) {
     }
 
     if (hotspots.length === 0) {
-        return { content: `> ## There are currently no hotspots created`, flags: MessageFlags.Ephemeral };
+        await interaction.reply({ content: `> ## There are currently no hotspots created`, ephemeral: true });
+        return;
     }
 
     let hotspotList = '';
@@ -219,7 +218,7 @@ async function ViewHotspot(interaction) {
         hotspotList += '\n';
     });
 
-    return { content: hotspotList, allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral };
+    await interaction.reply({ content: hotspotList, allowedMentions: { parse: [] }, ephemeral: true });
 }
 
 async function PingHotspot(interaction) {
@@ -232,7 +231,8 @@ async function PingHotspot(interaction) {
     const hotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID);
 
     if (!hotspot) {
-        return { content: `> # Hotspot *${NAME}* does not exist.`, flags: MessageFlags.Ephemeral };
+        await interaction.reply({ content: `> # Hotspot *${NAME}* does not exist.`, ephemeral: true });
+        return;
     }
 
     const denyPings = appData.denyPings || [];
@@ -245,26 +245,16 @@ async function PingHotspot(interaction) {
     // }
 
     if (hotspot.members.length === 0) {
-        return { content: `> ## Hotspot *${NAME}* has no members to ping.`, flags: MessageFlags.Ephemeral };
+        await interaction.reply({ content: `> ## Hotspot *${NAME}* has no members to ping.`, ephemeral: true });
+        return;
     }
     
     const mentions = hotspot.members.map(id => `<@${id}>`).join(' ');
     let content = `> ## Members of *${hotspot.name}*:\n> ${mentions}`
     content += MESSAGE != '' ? `\n> ## ${MESSAGE}` : '';
 
-    return { content: content, allowedMentions: { users: hotspot.members } };
+    await interaction.reply({ content: content, allowedMentions: { users: hotspot.members } });
 
-}
-
-async function ClearHotspots(interaction) {
-    RefreshAppData();
-    
-    const GUILD_ID = interaction.guildId;
-
-    appData.hotspots = appData.hotspots.filter(hotspot => hotspot.guildId !== GUILD_ID);
-
-    fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
-    return { content: '> ## All hotspots have been cleared.' };
 }
 
 module.exports = {
@@ -273,59 +263,25 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
 
         if (subcommand === 'create') {
-            const result = await CreateHotspot(interaction);
-            if (typeof result === 'string') {
-                await interaction.reply({ content: result, allowedMentions: { parse: [] } });
-            } else {
-                await interaction.reply(result);
-            }
+            await CreateHotspot(interaction);
             return;
         }
-
-        if (subcommand === 'all' || subcommand === 'single') {
-            const result = await ViewHotspot(interaction);
-            await interaction.reply(result);
-            return;
-        }
-
-        if (subcommand === 'ping') {
-            const result = await PingHotspot(interaction);
-            if (typeof result === 'string') {
-                await interaction.reply({ content: result, allowedMentions: { parse: [] } });
-            } else {
-                await interaction.reply(result);
-            }
-            return;
-        }
-
         if (subcommand === 'join') {
-            const result = await JoinHotspot(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] }
-            })
+            await JoinHotspot(interaction);
             return;
         }
-
         if (subcommand === 'leave') {
-            const result = await LeaveHotspot(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] }
-            })
+            await LeaveHotspot(interaction);
             return;
         }
-
-        if (subcommand === 'clear') {
-            const confirm = interaction.options.getBoolean('confirm');
-            if (confirm) {
-                ClearHotspots(interaction);
-            } else {
-                await interaction.reply('Hotspot clearing cancelled.');
-            }
+        if (subcommand === 'all' || subcommand === 'single') {
+            await ViewHotspot(interaction);
             return;
         }
-
+        if (subcommand === 'ping') {
+            await PingHotspot(interaction);
+            return;
+        }
         await interaction.reply('Hotspot command is under construction.');
     },
     async autocomplete(interaction) {

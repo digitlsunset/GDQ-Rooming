@@ -133,24 +133,14 @@ async function CreateRoom(interaction) {
         if (room.guildId === GUILD_ID && room.id >= template.id)
             template.id = room.id + 1;
     });
+    
+    template.guildId = GUILD_ID;
+    template.name = NAME;
+    template.roomNumber = ROOM_NUMBER;
+    template.maxSize = SIZE || null;
+    template.members = [USER_ID];
 
-    // Check if room already exists
-    const existingRoom = appData.rooms.find(room => room.name.toLowerCase() === NAME.toLowerCase());
-
-    if (existingRoom) {
-        return { content: `> # A room with the name "${NAME}" already exists. Please choose a different name.`, flags: MessageFlags.Ephemeral };
-    }
-
-    // Create new room object
-    const newRoom = {...appData.templates.room};
-
-    newRoom.guildId = GUILD_ID;
-    newRoom.name = NAME;
-    newRoom.roomNumber = ROOM_NUMBER;
-    newRoom.maxSize = SIZE || null;
-    newRoom.members = [USER_ID];
-
-    appData.rooms.push(newRoom);
+    appData.rooms.push(template);
     
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
     
@@ -289,7 +279,8 @@ async function PingRoom(interaction) {
     const room = appData.rooms.find(room => room.name.toLowerCase() === NAME.toLowerCase() && room.guildId === GUILD_ID);
 
     if (!room) {
-        return { content: `> # Room *${NAME}* does not exist.`, flags: MessageFlags.Ephemeral };
+        await interaction.reply({ content: `> # Room *${NAME}* does not exist.`, flags: MessageFlags.Ephemeral });
+        return;
     }
 
     const denyPings = appData.denyPings || [];
@@ -298,18 +289,19 @@ async function PingRoom(interaction) {
 
     // Un-comment later
     // if (room.members.length === 1 && room.members[0] === USER_ID) {
-    //     return { content: `> ## Room *${NAME}* has no other members to ping.`, allowedMentions: { parse: [] } };
+    //     await interaction.reply({ content: `> ## Room *${NAME}* has no other members to ping.`, allowedMentions: { parse: [] } });
     // }
 
     if (room.members.length === 0) {
-        return { content: `> ## Room *${NAME}* has no members to ping.`, flags: MessageFlags.Ephemeral };
+        await interaction.reply({ content: `> ## Room *${NAME}* has no members to ping.`, flags: MessageFlags.Ephemeral });
+        return;
     }
     
     const mentions = room.members.map(id => `<@${id}>`).join(' ');
     let content = `> ## Members of *${room.name}*:\n> ${mentions}`
     content += MESSAGE != '' ? `\n> ## ${MESSAGE}` : '';
 
-    return { content: content, allowedMentions: { users: room.members } };
+    await interaction.reply({ content: content, allowedMentions: { users: room.members } });
 
 }
 
@@ -340,7 +332,11 @@ module.exports = {
 
         if (subcommand === 'all' || subcommand === 'view') {
             const result = await ViewRooms(interaction);
-            await interaction.reply(result);
+            await interaction.reply({
+                content: result,
+                allowedMentions: { parse: [] },
+                flags: MessageFlags.Ephemeral
+            })
             return;
         }
 
