@@ -123,15 +123,25 @@ async function CreateGroup(interaction) {
             template.id = group.id + 1;
     });
 
-    template.guildId = GUILD_ID;
-    template.name = NAME;
-    template.startTime = DATETIME;
-    template.status = null;
-    template.duration = SIZE || null;
-    template.members = [USER_ID];
+    // Check if group already exists
+    const existingGroup = appData.groups.find(group => group.name.toLowerCase() === NAME.toLowerCase());
 
-    appData.groups.push(template);
-    
+    if (existingGroup) {
+        return { content: `> # A group with the name "${NAME}" already exists. Please choose a different name.`, flags: MessageFlags.Ephemeral };
+    }
+
+    // Create new group object
+    const newGroup = {...appData.templates.group};
+
+    newGroup.guildId = GUILD_ID;
+    newGroup.name = NAME;
+    newGroup.startTime = DATETIME;
+    newGroup.status = null;
+    newGroup.duration = SIZE || null;
+    newGroup.members = [USER_ID];
+
+    appData.groups.push(newGroup);
+
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
     
     return SIZE ? `> ## Group *${NAME}* created with a limit of ${SIZE} members.` : `> ## Group *${NAME}* created with no member limit.`;
@@ -279,7 +289,7 @@ async function PingGroup(interaction) {
         return {
             content: `> ## Group *${GROUP_NAME}* has no members to ping.`,
             allowedMentions: { parse: [] },
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         }
     }
 
@@ -302,7 +312,7 @@ async function ClearGroups(interaction) {
     appData.groups = appData.groups.filter(group => group.guildId !== GUILD_ID);
 
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
-    await interaction.reply('> ## All groups have been cleared.');
+    return { content: '> ## All groups have been cleared.' };
 }
 
 module.exports = {
@@ -312,20 +322,17 @@ module.exports = {
 
         if (subcommand === 'create') {
             const result = await CreateGroup(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] }
-            })
+            if (typeof result === 'string') {
+                await interaction.reply({ content: result, allowedMentions: { parse: [] } });
+            } else {
+                await interaction.reply(result);
+            }
             return;
         }
 
         if (subcommand === 'all' || subcommand === 'view') {
             const result = await ViewGroups(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] },
-                ephemeral: true
-            })
+            await interaction.reply(result);
             return;
         }
 

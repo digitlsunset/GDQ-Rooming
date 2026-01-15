@@ -17,7 +17,7 @@ const data = new SlashCommandBuilder()
             .addSubcommand(subcommand =>
                 subcommand
                     .setName('single')
-                    .setDescription('View user info')
+                    .setDescription('View user info. To view your own profile, do not specify a user.')
                     .addUserOption(option =>
                         option
                             .setName('target')
@@ -38,7 +38,9 @@ async function RefreshAppData() {
 
 async function ViewUser(interaction) {
     RefreshAppData();
-    const user = interaction.options.getUser('target') || interaction.user;
+    const targetUser = interaction.options.getUser('target');
+    console.log('ViewUser target:', targetUser ? `${targetUser.username}#${targetUser.discriminator} (${targetUser.id})` : 'none');
+    const user = targetUser || interaction.user;
     const userRooms = [];
     const userGroups = [];
     const userRoles = [];
@@ -53,23 +55,60 @@ async function ViewUser(interaction) {
         .setFooter({ text: 'CH x GDQ', iconURL: 'https://avatars.githubusercontent.com/u/10563385?s=200&v=4' });
     ;
 
-    appData.rooms.forEach(room => {
-        if (room.guildId !== interaction.guildId) return;
+    if (appData.rooms) {
+        appData.rooms.forEach(room => {
+            if (room.guildId !== interaction.guildId) return;
 
-        room.members.forEach(memberId => {
-            if (memberId !== user.id) return;
-            userRooms.push(room.name);
+            room.members.forEach(memberId => {
+                if (memberId !== user.id) return;
+                userRooms.push(room.name);
+            });
         });
-    });
+    }
 
-    appData.groups.forEach(group => {
-        if (group.guildId !== interaction.guildId) return;
+    if (appData.groups) {
+        appData.groups.forEach(group => {
+            if (group.guildId !== interaction.guildId) return;
 
-        group.members.forEach(memberId => {
-            if (memberId !== user.id) return;
-            userGroups.push(group.name);
+            group.members.forEach(memberId => {
+                if (memberId !== user.id) return;
+                userGroups.push(group.name);
+            });
         });
-    });
+    }
+
+    if (appData.roles) {
+        appData.roles.forEach(role => {
+            if (role.guildId !== interaction.guildId) return;
+
+            role.members.forEach(memberId => {
+                if (memberId !== user.id) return;
+                userRoles.push(role.name);
+            });
+        });
+    }
+
+    if (appData.runs) {
+    appData.runs.forEach(run => {
+        if (run.guildId !== interaction.guildId) return;
+
+            run.members.forEach(memberId => {
+                if (memberId !== user.id) return;
+                userRuns.push(run.name);
+            });
+        });
+    }
+
+    if (appData.hotspots) {
+        appData.hotspots.forEach(hotspot => {
+            if (hotspot.guildId !== interaction.guildId) return;
+
+            hotspot.members.forEach(memberId => {
+                if (memberId !== user.id) return;
+                userHotspots.push(hotspot.name);
+            });
+        });
+    }
 
     exampleEmbed.addFields(
         { name: 'Room:', value: userRooms.length ? userRooms.join('\n') : 'None', inline: true },
@@ -79,8 +118,20 @@ async function ViewUser(interaction) {
         { name: 'Groups:', value: userGroups.length ? userGroups.join('\n') : 'None', inline: true },
     );
 
-    await interaction.reply({ embeds: [exampleEmbed], ephemeral: true });
-}
+    exampleEmbed.addFields(
+        { name: 'Roles:', value: userRoles.length ? userRoles.join('\n') : 'None', inline: true },
+    );
+
+    exampleEmbed.addFields(
+        { name: 'Runs:', value: userRuns.length ? userRuns.join('\n') : 'None', inline: true },
+    );
+
+    exampleEmbed.addFields(
+        { name: 'Hotspots:', value: userHotspots.length ? userHotspots.join('\n') : 'None', inline: true },
+    );
+
+    await interaction.reply({ embeds: [exampleEmbed], flags: MessageFlags.Ephemeral });
+} 
 
 async function ViewAll(interaction) {
     RefreshAppData();
@@ -135,7 +186,7 @@ async function TogglePings(interaction) {
 
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 2));
 
-    await interaction.reply({ content: `You have ${denyUser ? 'enabled' : 'disabled'} pings.`, ephemeral: true });
+    await interaction.reply({ content: `You have ${denyUser ? 'enabled' : 'disabled'} pings.`, flags: MessageFlags.Ephemeral });
 }
 
 module.exports = {
@@ -144,11 +195,7 @@ module.exports = {
         const subcommand = interaction.options.getSubcommand();
 
         if (subcommand === 'single') {
-            const result = await ViewUser(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] }
-            })
+            await ViewUser(interaction);
             return;
         }
 

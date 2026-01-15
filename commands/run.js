@@ -120,28 +120,39 @@ async function CreateRun(interaction) {
     const USER_ID = interaction.user.id;
     const NAME = interaction.options.getString('run');
     const CATEGORY = interaction.options.getString('category');
-    const template = {...appData.templates.run};
 
     DATETIME = interaction.options.getString('datetime') !== null && interaction.options.getString('datetime').match(/\d+/) ? 
                 interaction.options.getString('datetime').match(/\d+/)[0] : null;
 
     ESTIMATE = interaction.options.getInteger('estimated');
     const ESTIMATE_FORMATTED = 'in ' + Math.floor(ESTIMATE / 60) + ' hours and ' + ESTIMATE % 60 + ' minutes';
+    const template = {...appData.templates.run};
 
     appData.runs.forEach(run => {
         if (run.guildId === GUILD_ID && run.id >= template.id)
             template.id = run.id + 1;
     });
 
-    template.guildId = GUILD_ID;
-    template.name = NAME;
-    template.category = CATEGORY;
-    template.startTime = DATETIME;
-    template.status = null;
-    template.duration = ESTIMATE_FORMATTED;
-    template.members = [USER_ID];
+    // Check if run already exists
+    const existingRun = appData.runs.find(run => run.name.toLowerCase() === NAME.toLowerCase());
 
-    appData.runs.push(template);
+    if (existingRun) {
+        await interaction.reply({ content: `> # A run with the name "${NAME}" already exists. Please choose a different name.`, flags: MessageFlags.Ephemeral });
+        return;
+    }
+
+    // Create new run object
+    const newRun = {...appData.templates.run};
+
+    newRun.guildId = GUILD_ID;
+    newRun.name = NAME;
+    newRun.category = CATEGORY;
+    newRun.startTime = DATETIME;
+    newRun.status = null;
+    newRun.duration = ESTIMATE_FORMATTED;
+    newRun.members = [USER_ID];
+
+    appData.runs.push(newRun);
     
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
     
@@ -160,7 +171,7 @@ async function ViewRuns(interaction) {
     }
 
     if (runs.length === 0) {
-        return '> ## Interest in this run does not currently exist.';
+        return '> ## There are no runs of interest at this moment.';
     }
 
     let runList = '';
@@ -308,11 +319,7 @@ module.exports = {
 
         if (subcommand === 'all' || subcommand === 'single') {
             const result = await ViewRuns(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] },
-                ephemeral: true
-            })
+            await interaction.reply(result);
             return;
         }
 

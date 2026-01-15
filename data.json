@@ -53,9 +53,7 @@
             "members": []
         }
     },
-    "denyPings": [
-        "138667796006436864"
-    ],
+    "denyPings": [],
     "rooms": [
         {
             "id": 0,
@@ -63,33 +61,28 @@
             "name": "Default Room",
             "roomNumber": "N/A",
             "maxSize": null,
-            "members": [
-                "138667796006436864",
-                "401915946446487584"
-            ]
+            "members": []
         }
     ],
     "groups": [
         {
             "id": 0,
-            "guildId": "1028207093594984549",
-            "name": "Escape Room",
-            "startTime": "1769036400",
-            "status": null,
-            "duration": 5,
-            "members": [
-                "401915946446487584"
-            ]
-        },
-        {
-            "id": 0,
             "guildId": "1091809778860302366",
-            "name": "Twins",
+            "name": "Default Group",
             "startTime": null,
             "status": null,
             "duration": null,
+            "members": []
+        },
+        {
+            "id": 0,
+            "guildId": "1028207093594984549",
+            "name": "abc",
+            "startTime": null,
+            "status": null,
+            "duration": 4,
             "members": [
-                "138667796006436864"
+                "401915946446487584"
             ]
         }
     ],
@@ -97,69 +90,23 @@
         {
             "id": 1,
             "guildId": "1091809778860302366",
-            "name": "Super Mario 64",
-            "category": "120 Star",
-            "startTime": "2026-07-11T21:00-06:00",
-            "duration": "PT1H40M",
+            "name": "Default Run",
+            "category": "Default Category",
+            "startTime": null,
+            "duration": "Default Duration",
             "status": 0,
-            "members": [
-                "138667796006436864"
-            ]
-        },
-        {
-            "id": 0,
-            "guildId": "1028207093594984549",
-            "name": "Road Trip",
-            "category": "Any% NMG",
-            "startTime": "1769036400",
-            "duration": "in 1 hours and 40 minutes",
-            "status": null,
-            "members": [
-                "401915946446487584"
-            ]
-        },
-        {
-            "id": 2,
-            "guildId": "1091809778860302366",
-            "name": "The Legend of Zelda: Tears of the Kingdom",
-            "category": "Any%",
-            "startTime": "1768358580",
-            "duration": "in 0 hours and 15 minutes",
-            "status": null,
-            "members": [
-                "138667796006436864",
-                "401915946446487584"
-            ]
+            "members": []
         }
     ],
     "hotspots": [
         {
             "id": 1,
             "guildId": "1091809778860302366",
-            "name": "Caribou Coffee",
-            "type": 1,
-            "url": "https://www.cariboucoffee.com",
-            "address": "509 Washington Ave S, Minneapolis, MN 55415",
-            "members": [
-                "138667796006436864"
-            ]
-        },
-        {
-            "id": 0,
-            "guildId": "1091809778860302366",
-            "name": "The Cafe Meow",
-            "type": {
-                "Unknown": null,
-                "Restaurant": 0,
-                "Cafe": 1,
-                "Bar": 2,
-                "Sports": 3
-            },
-            "members": [
-                "138667796006436864"
-            ],
-            "url": "https://thecafemeow.com/",
-            "address": "1718A Lexington Ave N, Roseville, MN 55113"
+            "name": "Default Hotspot",
+            "type": null,
+            "url": null,
+            "address": null,
+            "members": []
         }
     ]
 }
