@@ -19,7 +19,7 @@
                 "Ongoing": 1,
                 "Completed": 2
             },
-            "duration": null,
+            "maxSize": null,
             "members": []
         },
         "run": {
@@ -28,7 +28,7 @@
             "name": "Default Run",
             "category": "Default Category",
             "startTime": null,
-            "duration": " ",
+            "duration": "0 hours and 0 minutes",
             "status": {
                 "Unknown": null,
                 "Planned": 0,
@@ -48,65 +48,14 @@
                 "Bar": 2,
                 "Sports": 3
             },
-            "URL": null,
-            "Address": null,
-            "members": []
-        }
-    },
-    "denyPings": [],
-    "rooms": [
-        {
-            "id": 0,
-            "guildId": "1091809778860302366",
-            "name": "Default Room",
-            "roomNumber": "N/A",
-            "maxSize": null,
-            "members": []
-        }
-    ],
-    "groups": [
-        {
-            "id": 0,
-            "guildId": "1091809778860302366",
-            "name": "Default Group",
-            "startTime": null,
-            "status": null,
-            "duration": null,
-            "members": []
-        },
-        {
-            "id": 0,
-            "guildId": "1028207093594984549",
-            "name": "abc",
-            "startTime": null,
-            "status": null,
-            "duration": 4,
-            "members": [
-                "401915946446487584"
-            ]
-        }
-    ],
-    "runs": [
-        {
-            "id": 1,
-            "guildId": "1091809778860302366",
-            "name": "Default Run",
-            "category": "Default Category",
-            "startTime": null,
-            "duration": "Default Duration",
-            "status": 0,
-            "members": []
-        }
-    ],
-    "hotspots": [
-        {
-            "id": 1,
-            "guildId": "1091809778860302366",
-            "name": "Default Hotspot",
-            "type": null,
             "url": null,
             "address": null,
             "members": []
         }
-    ]
+    },
+    "denyPings": [],
+    "rooms": [],
+    "groups": [],
+    "runs": [],
+    "hotspots": []
 }

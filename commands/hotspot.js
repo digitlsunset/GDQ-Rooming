@@ -108,6 +108,7 @@ async function RefreshAppData() {
 
 async function CreateHotspot(interaction) {
     RefreshAppData();
+
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
     const NAME = interaction.options.getString('hotspot');
@@ -122,16 +123,20 @@ async function CreateHotspot(interaction) {
         return;
     }
 
-    // Create new hotspot object
-    const newHotspot = {...appData.templates.hotspot};
-    newHotspot.name = NAME;
-    newHotspot.url = URL || '';
-    newHotspot.address = ADDR || '';
-    newHotspot.guildId = GUILD_ID;
-    newHotspot.members = [USER_ID];
+    const template = {...appData.templates.hotspot};
 
+    appData.hotspots.forEach(hotspot => {
+        if (hotspot.guildId === GUILD_ID && hotspot.id >= template.id)
+            template.id = hotspot.id + 1;
+    });
+
+    template.name = NAME;
+    template.url = URL || '';
+    template.address = ADDR || '';
+    template.guildId = GUILD_ID;
+    template.members = [USER_ID];
     // Add new hotspot to appData
-    appData.hotspots.push(newHotspot);
+    appData.hotspots.push(template);
     
     fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
 
@@ -165,27 +170,53 @@ async function JoinHotspot(interaction) {
 
 async function LeaveHotspot(interaction) {
     RefreshAppData();
+
     const GUILD_ID = interaction.guildId;
     const USER_ID = interaction.user.id;
-    const NAME = interaction.options.getString('hotspot');
+    let HOTSPOT_NAME = interaction.options.getString('hotspot');
+    let hotspot = null;
 
-    const hotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID);
+    if (HOTSPOT_NAME) {
+        hotspot = appData.hotspots.find(hotspot => hotspot.guildId === GUILD_ID && hotspot.name === HOTSPOT_NAME);
 
-    if (!hotspot) {
-        await interaction.reply({ content: `> # Hotspot *${NAME}* does not exist.`, ephemeral: true });
-        return;
+        if (!hotspot) {
+            return `> ## Interest in Hotspot *${HOTSPOT_NAME}* does not exist.`;
+        }
+
+        if (!hotspot.members.includes(USER_ID)) {
+            return `> ## You are already not interested in Hotspot *${HOTSPOT_NAME}*.`;
+        }
+
+        hotspot.members = hotspot.members.filter(memberId => memberId !== USER_ID);
+
+        if (hotspot.members.length === 0) {
+            appData.hotspots = appData.hotspots.filter(h => h.guildId === hotspot.guildId && h.id !== hotspot.id);
+        }
+
+        fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
+    }
+    else {
+        hotspot = appData.hotspots.find(hotspot => hotspot.guildId === GUILD_ID && hotspot.members.includes(USER_ID));
+
+        if (!hotspot) {
+            return `> ## You are not interested in any Hotspots.`;
+        }
+
+        hotspot.members = hotspot.members.filter(memberId => memberId !== USER_ID);
+        if (hotspot.members.length === 0) {
+            appData.hotspots = appData.hotspots.filter(h => h.guildId === hotspot.guildId && h.id !== hotspot.id);
+        }
+
+        fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
     }
 
-    if (!hotspot.members.includes(USER_ID)) {
-        await interaction.reply({ content: `> # You are not a member of hotspot *${NAME}*.`, ephemeral: true });
-        return;
+    let outcome = `> ## You have left Hotspot *${hotspot.name}*.`;
+
+    if (appData.hotspots.find(h => h.guildId === GUILD_ID && h.id === hotspot.id) === undefined) {
+        outcome += `\n> ## Hotspot *${hotspot.name}* has been deleted as it is now empty.`;
     }
 
-    appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID).members = hotspot.members.filter(member => member !== USER_ID);
-    
-    fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
-
-    await interaction.reply({ content: `> # <@${USER_ID}> left hotspot *${NAME}*.` , allowedMentions: { parse: [] }});
+    return outcome;
 }
 
 async function ViewHotspot(interaction) {
@@ -239,11 +270,6 @@ async function PingHotspot(interaction) {
 
     hotspot.members = hotspot.members.filter(member => !denyPings.includes(member));
 
-    // Un-comment later
-    // if (hotspot.members.length === 1 && hotspot.members[0] === USER_ID) {
-    //     await interaction.reply({ content: `> ## Hotspot *${NAME}* has no other members to ping.`, allowedMentions: { parse: [] } });
-    // }
-
     if (hotspot.members.length === 0) {
         await interaction.reply({ content: `> ## Hotspot *${NAME}* has no members to ping.`, ephemeral: true });
         return;
@@ -255,6 +281,17 @@ async function PingHotspot(interaction) {
 
     await interaction.reply({ content: content, allowedMentions: { users: hotspot.members } });
 
+}
+
+async function ClearHotspots(interaction) {
+    RefreshAppData();
+    
+    const GUILD_ID = interaction.guildId;
+
+    appData.hotspots = appData.hotspots.filter(hotspot => hotspot.guildId !== GUILD_ID);
+
+    fs.writeFileSync('./data.json', JSON.stringify(appData, null, 4));
+    await interaction.reply('> ## All hotspots have been cleared.');
 }
 
 module.exports = {
@@ -271,7 +308,11 @@ module.exports = {
             return;
         }
         if (subcommand === 'leave') {
-            await LeaveHotspot(interaction);
+            const result = await LeaveHotspot(interaction);
+            await interaction.reply({
+                content: result,
+                allowedMentions: { parse: [] }
+            })
             return;
         }
         if (subcommand === 'all' || subcommand === 'single') {
@@ -280,6 +321,15 @@ module.exports = {
         }
         if (subcommand === 'ping') {
             await PingHotspot(interaction);
+            return;
+        }
+        if (subcommand === 'clear') {
+            const confirm = interaction.options.getBoolean('confirm');
+            if (confirm) {
+                ClearHotspots(interaction);
+            } else {
+                await interaction.reply('Hotspot clearing cancelled.');
+            }
             return;
         }
         await interaction.reply('Hotspot command is under construction.');

@@ -126,7 +126,16 @@ async function CreateRun(interaction) {
                 interaction.options.getString('datetime').match(/\d+/)[0] : null;
 
     ESTIMATE = interaction.options.getInteger('estimated');
-    const ESTIMATE_FORMATTED = 'in ' + Math.floor(ESTIMATE / 60) + ' hours and ' + ESTIMATE % 60 + ' minutes';
+    let ESTIMATE_FORMATTED = 'in ';
+    if (ESTIMATE != 0) {
+        ESTIMATE_FORMATTED += (ESTIMATE / 60) >= 1.0 ? Math.floor(ESTIMATE / 60)  + ' hour(s)' : '';
+        ESTIMATE_FORMATTED += (ESTIMATE / 60) >= 1.0 && (ESTIMATE % 60) != 0 ? ' and ' : '';
+        ESTIMATE_FORMATTED += (ESTIMATE % 60) != 0 ? (ESTIMATE % 60) + ' minute(s)' : '';
+    }
+
+    else {
+        ESTIMATE_FORMATTED += '0 minutes';
+    }
 
     appData.runs.forEach(run => {
         if (run.guildId === GUILD_ID && run.id >= template.id)
@@ -255,7 +264,7 @@ async function LeaveRun(interaction) {
 
 async function PingRun(interaction) {
     RefreshAppData();
-    const USER_ID = interaction.user.id;
+
     const GUILD_ID = interaction.guildId;
     const RUN_NAME = interaction.options.getString('run');
     const MESSAGE = interaction.options.getString('message') || '';
@@ -266,13 +275,21 @@ async function PingRun(interaction) {
         return `> ## Run *${RUN_NAME}* does not exist.`;
     }
 
-    // Un-comment later
-    // if (run.members.length === 1 && run.members[0] === USER_ID) {
-    //     return `> ## Run *${RUN_NAME}* has no other members to ping.`;
-    // }
+    const denyPings = appData.denyPings || [];
+
+    run.members = run.members.filter(member => !denyPings.includes(member));
+
+    if (run.members.length === 0) {
+        return {
+            content: `> ## Run *${RUN_NAME}* has no members to ping.`,
+            allowedMentions: { parse: [] },
+            ephemeral: true
+        }
+    }
 
     const mentions = run.members.map(id => `<@${id}>`).join(' ');
-    const content = `> ## Members of *${run.name}*:\n> ${mentions}\n> ## ${MESSAGE}`;
+    let content = `> ## Members of *${run.name}*:\n> ${mentions}`
+    content += MESSAGE != '' ? `\n> ## ${MESSAGE}` : '';
 
     // Return an object so the caller can use the proper allowedMentions to actually ping the users
     return {

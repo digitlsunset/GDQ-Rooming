@@ -63,7 +63,7 @@ const data = new SlashCommandBuilder()
             // View Single Room
             .addSubcommand(subcommand =>
                 subcommand
-                    .setName('view')
+                    .setName('single')
                     .setDescription('View a single room')
                     .addStringOption((option) =>
                         option
@@ -157,11 +157,11 @@ async function CreateRoom(interaction) {
 
 async function ViewRooms(interaction) {
     RefreshAppData();
+
     const GUILD_ID = interaction.guildId;
 
     let rooms = appData.rooms.filter(room => room.guildId === GUILD_ID);
-
-    if (interaction.options.getSubcommand() === 'view') {
+    if (interaction.options.getSubcommand() === 'single') {
         const ROOM_NAME = interaction.options.getString('room');
         rooms = rooms.filter(room => room.name === ROOM_NAME);
     }
@@ -295,11 +295,6 @@ async function PingRoom(interaction) {
 
     room.members = room.members.filter(member => !denyPings.includes(member));
 
-    // Un-comment later
-    // if (room.members.length === 1 && room.members[0] === USER_ID) {
-    //     await interaction.reply({ content: `> ## Room *${NAME}* has no other members to ping.`, allowedMentions: { parse: [] } });
-    // }
-
     if (room.members.length === 0) {
         await interaction.reply({ content: `> ## Room *${NAME}* has no members to ping.`, flags: MessageFlags.Ephemeral });
         return;
@@ -338,7 +333,7 @@ module.exports = {
             return;
         }
 
-        if (subcommand === 'all' || subcommand === 'view') {
+        if (subcommand === 'all' || subcommand === 'single') {
             const result = await ViewRooms(interaction);
             await interaction.reply({
                 content: result,

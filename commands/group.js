@@ -50,6 +50,7 @@ let appData = require('../data.json');
                     .setRequired(false)
                     .setAutocomplete(true))
     )
+    // View Groups
     .addSubcommandGroup(group =>
         group
             .setName('view')
@@ -135,7 +136,7 @@ async function CreateGroup(interaction) {
     template.name = NAME;
     template.startTime = DATETIME;
     template.status = null;
-    template.duration = SIZE || null;
+    template.maxSize = SIZE || null;
     template.members = [USER_ID];
 
     appData.groups.push(template);
@@ -151,7 +152,7 @@ async function ViewGroups(interaction) {
     const GUILD_ID = interaction.guildId;
 
     let groups = appData.groups.filter(group => group.guildId === GUILD_ID);
-    if (interaction.options.getSubcommand() === 'view') {
+    if (interaction.options.getSubcommand() === 'single') {
         const GROUP_NAME = interaction.options.getString('group');
         groups = groups.filter(group => group.name === GROUP_NAME);
     }
@@ -163,7 +164,6 @@ async function ViewGroups(interaction) {
     let groupList = '';
     groups.forEach(group => {
         groupList += `> ## *${group.name}*`;
-
         groupList += group.maxSize ? ` (${group.members.length}/${group.maxSize} members)\n` : ` (${group.members.length} member(s))\n`;
 
         group.members.forEach(memberId => {
@@ -274,15 +274,6 @@ async function PingGroup(interaction) {
 
     group.members = group.members.filter(member => !denyPings.includes(member));
 
-    // Un-comment later
-    // if (group.members.length === 1 && group.members[0] === USER_ID) {
-    //     return {
-    //         content: `> ## Group *${GROUP_NAME}* has no members to ping.`,
-    //         allowedMentions: { parse: [] },
-    //         ephemeral: true
-    //     }
-    // }
-
     if (group.members.length === 0) {
         return {
             content: `> ## Group *${GROUP_NAME}* has no members to ping.`,
@@ -327,7 +318,7 @@ module.exports = {
             return;
         }
 
-        if (subcommand === 'all' || subcommand === 'view') {
+        if (subcommand === 'all' || subcommand === 'single') {
             const result = await ViewGroups(interaction);
             await interaction.reply({
                 content: result,
