@@ -114,6 +114,14 @@ async function CreateRoom(interaction) {
     const NAME = interaction.options.getString('room');
     const ROOM_NUMBER = interaction.options.getString('roomnumber');
     const SIZE = interaction.options.getInteger('size');
+
+    // Check if room already exists
+    const existingRoom = appData.rooms.find(room => room.name.toLowerCase() === NAME.toLowerCase());
+
+    if (existingRoom) {
+        return `> # A room with the name "${NAME}" already exists. Please choose a different name.`;
+    }
+
     const template = {...appData.templates.room};
     let fail = null;
 

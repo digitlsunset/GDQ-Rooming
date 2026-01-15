@@ -113,6 +113,14 @@ async function CreateGroup(interaction) {
     const USER_ID = interaction.user.id;
     const NAME = interaction.options.getString('group');
     const SIZE = interaction.options.getInteger('size');
+
+    // Check if group already exists
+    const existingGroup = appData.groups.find(group => group.name.toLowerCase() === NAME.toLowerCase());
+
+    if (existingGroup) {
+        return `> # A group with the name "${NAME}" already exists. Please choose a different name.`;
+    }
+
     const template = {...appData.templates.group};
 
     DATETIME = interaction.options.getString('datetime') !== null && interaction.options.getString('datetime').match(/\d+/) ? 
