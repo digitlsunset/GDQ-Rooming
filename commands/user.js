@@ -12,12 +12,12 @@ const data = new SlashCommandBuilder()
             .addSubcommand(subcommand =>
                 subcommand
                     .setName('all')
-                    .setDescription('View all user data')
+                    .setDescription('View all roles in the server and who has them')
             )
             .addSubcommand(subcommand =>
                 subcommand
                     .setName('single')
-                    .setDescription('View user info. To view your own profile, do not specify a user.')
+                    .setDescription('View user info. To view your own profile, do not specify a user')
                     .addUserOption(option =>
                         option
                             .setName('target')
@@ -39,7 +39,7 @@ async function RefreshAppData() {
 async function ViewUser(interaction) {
     RefreshAppData();
     const targetUser = interaction.options.getUser('target');
-    console.log('ViewUser target:', targetUser ? `${targetUser.username}#${targetUser.discriminator} (${targetUser.id})` : 'none');
+    // console.log('ViewUser target:', targetUser ? `${targetUser.username}#${targetUser.discriminator} (${targetUser.id})` : 'none');
     const user = targetUser || interaction.user;
     const userRooms = [];
     const userGroups = [];
@@ -136,7 +136,7 @@ async function ViewUser(interaction) {
 async function ViewAll(interaction) {
     RefreshAppData();
     // console.log(interaction);
-    console.log(await interaction.guild.roles.fetch());
+    // console.log(await interaction.guild.roles.fetch());
 
     const roles = await interaction.guild.roles.fetch();
     const members = await interaction.guild.members.fetch();

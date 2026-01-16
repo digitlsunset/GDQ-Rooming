@@ -238,7 +238,7 @@ async function ViewHotspot(interaction) {
     let hotspotList = '';
     hotspots.forEach(hotspot => {
         hotspotList += `> ## *${hotspot.name}*\n`;
-        hotspotList += hotspot.url ? `> - URL: ${hotspot.url}\n` : '';
+        hotspotList += hotspot.url ? `> - URL: <${hotspot.url}>\n` : '';
         hotspotList += hotspot.address ? `> - Address: ${hotspot.address}\n` : '';
         hotspotList += `> - Members:\n`;
 

@@ -126,7 +126,7 @@ async function CreateRun(interaction) {
                 interaction.options.getString('datetime').match(/\d+/)[0] : null;
 
     ESTIMATE = interaction.options.getInteger('estimated');
-    let ESTIMATE_FORMATTED = 'in ';
+    let ESTIMATE_FORMATTED = 'completed in ';
     if (ESTIMATE != 0) {
         ESTIMATE_FORMATTED += (ESTIMATE / 60) >= 1.0 ? Math.floor(ESTIMATE / 60)  + ' hour(s)' : '';
         ESTIMATE_FORMATTED += (ESTIMATE / 60) >= 1.0 && (ESTIMATE % 60) != 0 ? ' and ' : '';
