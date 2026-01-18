@@ -145,7 +145,7 @@ async function ViewAll(interaction) {
         .setFooter({ text: 'CH x GDQ', iconURL: 'https://avatars.githubusercontent.com/u/10563385?s=200&v=4' });
     ;
     
-    roles.forEach(role => {
+    roles.sort((a, b) => a.name.localeCompare(b.name)).forEach(role => {
         if (role.name === '@everyone') return;
         if (role.name === 'Testing-Jack') return;
         if (role.name === 'Rooming') return;
