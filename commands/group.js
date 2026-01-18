@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs');
 let appData = require('../data.json');
 
@@ -146,6 +146,31 @@ async function CreateGroup(interaction) {
     return SIZE ? `> ## Group *${NAME}* created with a limit of ${SIZE} members.` : `> ## Group *${NAME}* created with no member limit.`;
 }
 
+async function ViewSingle(interaction) {
+    RefreshAppData();
+    const GUILD_ID = interaction.guildId;
+    const NAME = interaction.options.getString('group');
+
+    let group = appData.groups.find(group => group.guildId === GUILD_ID && group.name === NAME);
+
+    if (group === undefined) {
+        return '> ## There are currently no groups created.';
+    }
+
+    let embed = new EmbedBuilder()
+            .setColor(0x0099FF)
+            .setTitle(group.name)
+            .setThumbnail('https://avatars.githubusercontent.com/u/10563385?s=200&v=4')
+    
+    embed.addFields(
+        { name: 'Start Time:', value: group.startTime ? `<t:${group.startTime}:s> (<t:${group.startTime}:R>)` : 'None', inline: true },
+        { name: 'Max Members:', value: group.maxSize ? group.maxSize.toString() : 'None', inline: true },
+        { name: 'Members:', value: group.members.length ? group.members.map(id => `<@${id}>`).join('\n') : 'None' },
+    );
+
+    await interaction.reply({ embeds: [embed], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+}
+
 async function ViewGroups(interaction) {
     RefreshAppData();
 
@@ -161,22 +186,23 @@ async function ViewGroups(interaction) {
         return '> ## There are currently no groups created.';
     }
 
-    let groupList = '';
+    let embed = new EmbedBuilder()
+            .setColor(0x0099FF)
+            .setTitle('All Groups')
+            .setThumbnail('https://avatars.githubusercontent.com/u/10563385?s=200&v=4')
+
     groups.forEach(group => {
-        groupList += `> ## *${group.name}*`;
-        groupList += group.maxSize ? ` (${group.members.length}/${group.maxSize} members)\n` : ` (${group.members.length} member(s))\n`;
-
-        group.members.forEach(memberId => {
-            groupList += `> - <@${memberId}>\n`;
-        });
-
-        groupList += group.startTime && group.startTime.length === 10 ? 
-                    `> - **Event Time: ** <t:${group.startTime}:s> (<t:${group.startTime}:R>)\n` : `> - **Event Time: ** Not set\n`;
-
-        groupList += '\n';
+        embed.addFields(
+            { name: `${group.name}`
+            , value:
+                `- Start Time: ${group.startTime ? `<t:${group.startTime}:s> (<t:${group.startTime}:R>)` : 'None'}
+                \n- Max Members: ${group.maxSize ? group.maxSize.toString() : 'None'}
+                \n- Members: ${group.members.length ? group.members.map(id => `<@${id}>`).join(', ') : 'None'}`
+            },
+        )
     });
 
-    return groupList;
+    await interaction.reply({ embeds: [embed], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 async function JoinGroup(interaction) {
@@ -318,13 +344,12 @@ module.exports = {
             return;
         }
 
-        if (subcommand === 'all' || subcommand === 'single') {
-            const result = await ViewGroups(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] },
-                ephemeral: true
-            })
+        if (subcommand === 'all') {
+            await ViewGroups(interaction);
+            return;
+        }
+        if (subcommand === 'single') {
+            await ViewSingle(interaction);
             return;
         }
 

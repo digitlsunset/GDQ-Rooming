@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs');
 let appData = require('../data.json');
 
@@ -155,35 +155,58 @@ async function CreateRoom(interaction) {
     return SIZE ? `> ## Room *${NAME}* created with a limit of ${SIZE} members.` : `> ## Room *${NAME}* created with no member limit.`;
 }
 
+async function ViewSingle(interaction) {
+    RefreshAppData();
+    const GUILD_ID = interaction.guildId;
+    const NAME = interaction.options.getString('room');
+
+    const room = appData.rooms.find(room => room.name.toLowerCase() === NAME.toLowerCase() && room.guildId === GUILD_ID);
+
+    if (room === undefined) {
+        await interaction.reply({ content: `> ## There are currently no rooms created`, flags: MessageFlags.Ephemeral });
+        return;
+    }
+
+    let embed = new EmbedBuilder()
+        .setColor(0x0099FF)
+        .setTitle(room.name)
+        .setThumbnail('https://avatars.githubusercontent.com/u/10563385?s=200&v=4')
+
+    embed.addFields(
+        { name: 'Room #/Address:', value: room.roomNumber ? room.roomNumber : 'None' },
+        { name: 'Members:', value: room.members.length ? room.members.map(id => `<@${id}>`).join('\n') : 'None' },
+    );
+
+    await interaction.reply({ embeds: [embed], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+}
+
 async function ViewRooms(interaction) {
     RefreshAppData();
-
     const GUILD_ID = interaction.guildId;
 
     let rooms = appData.rooms.filter(room => room.guildId === GUILD_ID);
-    if (interaction.options.getSubcommand() === 'single') {
-        const ROOM_NAME = interaction.options.getString('room');
-        rooms = rooms.filter(room => room.name === ROOM_NAME);
-    }
 
     if (rooms.length === 0) {
-        return '> ## There are currently no rooms created.';
+        await interaction.reply({ content: `> ## There are currently no rooms created`, flags: MessageFlags.Ephemeral });
+        return;
     }
 
-    let roomList = '';
-    rooms.forEach(room => {
-        roomList += `> ## *${room.name}*`;
-        roomList += room.roomNumber !== "N/A" ? ` [${room.roomNumber}]` : '';
-        roomList += room.maxSize ? ` (${room.members.length}/${room.maxSize} members)\n` : ` (${room.members.length} member(s))\n`;
+    let embed = new EmbedBuilder()
+        .setColor(0x0099FF)
+        .setTitle('All Rooms')
+        .setThumbnail('https://avatars.githubusercontent.com/u/10563385?s=200&v=4')
 
-        room.members.forEach(memberId => {
-            roomList += `> - <@${memberId}>\n`;
-        });
-
-        roomList += '\n';
+    rooms.sort((a, b) => a.name.localeCompare(b.name)).forEach(room => {
+        embed.addFields(
+            { name: `${room.name}`
+            , value:
+                `- Room #/Address: ${room.roomNumber ? room.roomNumber : 'None'}
+                \n- Members: ${room.members.length ? room.members.map(id => `<@${id}>`).join(', ') : 'None'}`
+            },
+        )
     });
 
-    return roomList;
+    await interaction.reply({ embeds: [embed], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 async function JoinRoom(interaction) {
@@ -333,13 +356,13 @@ module.exports = {
             return;
         }
 
-        if (subcommand === 'all' || subcommand === 'single') {
-            const result = await ViewRooms(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] },
-                flags: MessageFlags.Ephemeral
-            })
+        if (subcommand === 'all') {
+            await ViewRooms(interaction);
+            return;
+        }
+
+        if (subcommand === 'single') {
+            await ViewSingle(interaction);
             return;
         }
 

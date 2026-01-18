@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags, flatten } = require('discord.js');
 const fs = require('fs');
 let appData = require('../data.json');
 
@@ -119,7 +119,7 @@ async function CreateHotspot(interaction) {
     const existingHotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase());
 
     if (existingHotspot) {
-        await interaction.reply({ content: `> # A hotspot with the name "${NAME}" already exists. Please choose a different name.`, ephemeral: true });
+        await interaction.reply({ content: `> # A hotspot with the name "${NAME}" already exists. Please choose a different name.`, flags: MessageFlags.Ephemeral });
         return;
     }
 
@@ -152,12 +152,12 @@ async function JoinHotspot(interaction) {
     const hotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID);
 
     if (!hotspot) {
-        await interaction.reply({ content: `> # Hotspot *${NAME}* does not exist.`, ephemeral: true });
+        await interaction.reply({ content: `> # Hotspot *${NAME}* does not exist.`, flags: MessageFlags.Ephemeral });
         return;
     }
 
     if (hotspot.members.includes(USER_ID)) {
-        await interaction.reply({ content: `> # You are already a member of hotspot *${NAME}*.`, ephemeral: true });
+        await interaction.reply({ content: `> # You are already a member of hotspot *${NAME}*.`, flags: MessageFlags.Ephemeral });
         return;
     }
 
@@ -219,6 +219,32 @@ async function LeaveHotspot(interaction) {
     return outcome;
 }
 
+async function ViewSingle(interaction) {
+    RefreshAppData();
+    const GUILD_ID = interaction.guildId;
+    const NAME = interaction.options.getString('hotspot');
+
+    const hotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID);
+
+    if (hotspot === undefined) {
+        await interaction.reply({ content: `> ## There are currently no hotspots created`, flags: MessageFlags.Ephemeral });
+        return;
+    }
+
+    let embed = new EmbedBuilder()
+        .setColor(0x0099FF)
+        .setTitle(hotspot.name)
+        .setThumbnail('https://avatars.githubusercontent.com/u/10563385?s=200&v=4')
+
+    embed.addFields(
+        { name: 'URL:', value: hotspot.url ? `<${hotspot.url}>` : 'None', inline: true },
+        { name: 'Address:', value: hotspot.address ? hotspot.address : 'None', inline: true },
+        { name: 'Members:', value: hotspot.members.length ? hotspot.members.map(id => `<@${id}>`).join('\n') : 'None' },
+    );
+
+    await interaction.reply({ embeds: [embed], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+}
+
 async function ViewHotspot(interaction) {
     RefreshAppData();
     const GUILD_ID = interaction.guildId;
@@ -226,30 +252,28 @@ async function ViewHotspot(interaction) {
 
     let hotspots = appData.hotspots.filter(hotspot => hotspot.guildId === GUILD_ID);
 
-    if (interaction.options.getSubcommand() === 'single') {
-        hotspots = hotspots.filter(hotspot => hotspot.name === NAME);
-    }
-
     if (hotspots.length === 0) {
-        await interaction.reply({ content: `> ## There are currently no hotspots created`, ephemeral: true });
+        await interaction.reply({ content: `> ## There are currently no hotspots created`, flags: MessageFlags.Ephemeral });
         return;
     }
 
-    let hotspotList = '';
-    hotspots.forEach(hotspot => {
-        hotspotList += `> ## *${hotspot.name}*\n`;
-        hotspotList += hotspot.url ? `> - URL: <${hotspot.url}>\n` : '';
-        hotspotList += hotspot.address ? `> - Address: ${hotspot.address}\n` : '';
-        hotspotList += `> - Members:\n`;
+    let embed = new EmbedBuilder()
+        .setColor(0x0099FF)
+        .setTitle('All Hotspots')
+        .setThumbnail('https://avatars.githubusercontent.com/u/10563385?s=200&v=4')
 
-        hotspot.members.forEach(memberId => {
-            hotspotList += `>   - <@${memberId}>\n`;
-        });
-
-        hotspotList += '\n';
+    hotspots.sort((a, b) => a.name.localeCompare(b.name)).forEach(hotspot => {
+        embed.addFields(
+            { name: `${hotspot.name}`
+            , value:
+                `- URL: ${hotspot.url ? `<${hotspot.url}>` : 'None'}
+                \n- Address: ${hotspot.address ? hotspot.address : 'None'}
+                \n- Members: ${hotspot.members.length ? hotspot.members.map(id => `<@${id}>`).join(', ') : 'None'}`
+            },
+        )
     });
 
-    await interaction.reply({ content: hotspotList, allowedMentions: { parse: [] }, ephemeral: true });
+    await interaction.reply({ embeds: [embed], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 async function PingHotspot(interaction) {
@@ -262,7 +286,7 @@ async function PingHotspot(interaction) {
     const hotspot = appData.hotspots.find(hotspot => hotspot.name.toLowerCase() === NAME.toLowerCase() && hotspot.guildId === GUILD_ID);
 
     if (!hotspot) {
-        await interaction.reply({ content: `> # Hotspot *${NAME}* does not exist.`, ephemeral: true });
+        await interaction.reply({ content: `> # Hotspot *${NAME}* does not exist.`, flags: MessageFlags.Ephemeral });
         return;
     }
 
@@ -271,7 +295,7 @@ async function PingHotspot(interaction) {
     hotspot.members = hotspot.members.filter(member => !denyPings.includes(member));
 
     if (hotspot.members.length === 0) {
-        await interaction.reply({ content: `> ## Hotspot *${NAME}* has no members to ping.`, ephemeral: true });
+        await interaction.reply({ content: `> ## Hotspot *${NAME}* has no members to ping.`, flags: MessageFlags.Ephemeral });
         return;
     }
     
@@ -315,8 +339,12 @@ module.exports = {
             })
             return;
         }
-        if (subcommand === 'all' || subcommand === 'single') {
+        if (subcommand === 'all') {
             await ViewHotspot(interaction);
+            return;
+        }
+        if (subcommand === 'single') {
+            await ViewSingle(interaction);
             return;
         }
         if (subcommand === 'ping') {

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs');
 let appData = require('../data.json');
 
@@ -157,35 +157,59 @@ async function CreateRun(interaction) {
     return `> ## Interest in run *${NAME} (${CATEGORY})* has been created.`;
 }
 
+async function ViewSingle(interaction) {
+    RefreshAppData();
+    const GUILD_ID = interaction.guildId;
+    const NAME = interaction.options.getString('run');
+
+    const run = appData.runs.find(run => run.name.toLowerCase() === NAME.toLowerCase() && run.guildId === GUILD_ID);
+
+    if (run === undefined) {
+        await interaction.reply({ content: `> ## There are currently no runs created`, flags: MessageFlags.Ephemeral });
+        return;
+    }
+
+    let embed = new EmbedBuilder()
+        .setColor(0x0099FF)
+        .setTitle(`*${run.name} (${run.category})* ${run.duration}`)
+        .setThumbnail('https://avatars.githubusercontent.com/u/10563385?s=200&v=4')
+
+    embed.addFields(
+        { name: 'Start Time:', value: `${run.startTime ? `<t:${run.startTime}:s> (<t:${run.startTime}:R>)` : 'None'}`, inline: true },
+        { name: 'Viewers:', value: run.members.length ? run.members.map(id => `<@${id}>`).join('\n') : 'None' },
+    );
+
+    await interaction.reply({ embeds: [embed], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
+}
+
 async function ViewRuns(interaction) {
     RefreshAppData();
-
     const GUILD_ID = interaction.guildId;
+    const NAME = interaction.options.getString('run');
 
     let runs = appData.runs.filter(run => run.guildId === GUILD_ID);
-    if (interaction.options.getSubcommand() === 'single') {
-        const RUN_NAME = interaction.options.getString('run');
-        runs = runs.filter(run => run.name === RUN_NAME);
-    }
 
     if (runs.length === 0) {
-        return '> ## Interest in this run does not currently exist.';
+        await interaction.reply({ content: `> ## There are currently no runs created`, flags: MessageFlags.Ephemeral });
+        return;
     }
 
-    let runList = '';
-    runs.forEach(run => {
-        runList += `> ## *${run.name} (${run.category})* ${run.duration}\n`;
+    let embed = new EmbedBuilder()
+        .setColor(0x0099FF)
+        .setTitle('All Runs')
+        .setThumbnail('https://avatars.githubusercontent.com/u/10563385?s=200&v=4')
 
-        run.members.forEach(memberId => {
-            runList += `> - <@${memberId}>\n`;
-        });
-
-        runList += run.startTime && run.startTime.length === 10 ? 
-                    `> - **Event Time: ** <t:${run.startTime}:s> (<t:${run.startTime}:R>)\n` : `> - **Event Time: ** Not set\n`;
-        runList += '\n';
+    runs.sort((a, b) => a.name.localeCompare(b.name)).forEach(run => {
+        embed.addFields(
+            { name: `*${run.name} (${run.category})* ${run.duration}`
+            , value:
+                `- Start Time: ${run.startTime ? `<t:${run.startTime}:s> (<t:${run.startTime}:R>)` : 'None'}
+                \n- Viewers: ${run.members.length ? run.members.map(id => `<@${id}>`).join(', ') : 'None'}`
+            },
+        )
     });
 
-    return runList;
+    await interaction.reply({ embeds: [embed], allowedMentions: { parse: [] }, flags: MessageFlags.Ephemeral });
 }
 
 async function JoinRun(interaction) {
@@ -323,13 +347,12 @@ module.exports = {
             return;
         }
 
-        if (subcommand === 'all' || subcommand === 'single') {
-            const result = await ViewRuns(interaction);
-            await interaction.reply({
-                content: result,
-                allowedMentions: { parse: [] },
-                ephemeral: true
-            })
+        if (subcommand === 'all') {
+            await ViewRuns(interaction);
+            return;
+        }
+        if (subcommand === 'single') {
+            await ViewSingle(interaction);
             return;
         }
 
