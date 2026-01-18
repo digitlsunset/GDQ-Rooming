@@ -407,6 +407,7 @@ module.exports = {
 
         const rooms = appData.rooms
             .filter(room => room.guildId === GUILD_ID && room.name.toLowerCase().startsWith(VALUE.toLowerCase()))
+            .sort((a, b) => a.name.localeCompare(b.name))
             .map((room) => ({ name: room.name, value: room.name }));
 
         await interaction.respond(rooms.slice(0, 25));

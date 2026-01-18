@@ -370,6 +370,7 @@ module.exports = {
 
         const hotspots = appData.hotspots
             .filter(hotspot => hotspot.guildId === GUILD_ID && hotspot.name.toLowerCase().startsWith(VALUE.toLowerCase()))
+            .sort((a, b) => a.name.localeCompare(b.name))
             .map((hotspot) => ({ name: hotspot.name, value: hotspot.name }));
 
         await interaction.respond(hotspots.slice(0, 25));

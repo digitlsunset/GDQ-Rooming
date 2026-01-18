@@ -403,6 +403,7 @@ module.exports = {
 
         const runs = appData.runs
             .filter(run => run.guildId === GUILD_ID && run.name.toLowerCase().startsWith(VALUE.toLowerCase()))
+            .sort((a, b) => a.name.localeCompare(b.name))
             .map((run) => ({ name: run.name, value: run.name }));
 
         await interaction.respond(runs.slice(0, 25));

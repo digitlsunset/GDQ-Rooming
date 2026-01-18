@@ -400,6 +400,7 @@ module.exports = {
 
         const groups = appData.groups
             .filter(group => group.guildId === GUILD_ID && group.name.toLowerCase().startsWith(VALUE.toLowerCase()))
+            .sort((a, b) => a.name.localeCompare(b.name))
             .map((group) => ({ name: group.name, value: group.name }));
 
         await interaction.respond(groups.slice(0, 25));
