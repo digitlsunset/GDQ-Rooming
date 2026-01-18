@@ -38,8 +38,9 @@ async function RefreshAppData() {
 
 async function ViewUser(interaction) {
     RefreshAppData();
-    const targetUser = interaction.options.getUser('target');
+    const targetUser = interaction.options.getUser('target') || interaction.user;
     // console.log('ViewUser target:', targetUser ? `${targetUser.username}#${targetUser.discriminator} (${targetUser.id})` : 'none');
+    
     const user = targetUser || interaction.user;
     const userRooms = [];
     const userGroups = [];
@@ -77,16 +78,12 @@ async function ViewUser(interaction) {
         });
     }
 
-    if (appData.roles) {
-        appData.roles.forEach(role => {
-            if (role.guildId !== interaction.guildId) return;
-
-            role.members.forEach(memberId => {
-                if (memberId !== user.id) return;
-                userRoles.push(role.name);
-            });
-        });
-    }
+    const roles = await interaction.guild.roles.fetch();
+    roles.forEach(role => {
+        if (role.name === '@everyone') return;
+        if (!role.members.has(targetUser.id)) return;
+        userRoles.push(role.name);
+    });
 
     if (appData.runs) {
     appData.runs.forEach(run => {
@@ -111,23 +108,23 @@ async function ViewUser(interaction) {
     }
 
     exampleEmbed.addFields(
-        { name: 'Room:', value: userRooms.length ? userRooms.join('\n') : 'None', inline: true },
+        { name: 'Room:', value: userRooms.length ? userRooms.sort((a, b) => a.localeCompare(b)).join('\n') : 'None', inline: true },
     );
 
     exampleEmbed.addFields(
-        { name: 'Groups:', value: userGroups.length ? userGroups.join('\n') : 'None', inline: true },
+        { name: 'Groups:', value: userGroups.length ? userGroups.sort((a, b) => a.localeCompare(b)).join('\n') : 'None', inline: true },
     );
 
     exampleEmbed.addFields(
-        { name: 'Roles:', value: userRoles.length ? userRoles.join('\n') : 'None', inline: true },
+        { name: 'Roles:', value: userRoles.length ? userRoles.sort((a, b) => a.localeCompare(b)).join('\n') : 'None', inline: true },
     );
 
     exampleEmbed.addFields(
-        { name: 'Runs:', value: userRuns.length ? userRuns.join('\n') : 'None', inline: true },
+        { name: 'Runs:', value: userRuns.length ? userRuns.sort((a, b) => a.localeCompare(b)).join('\n') : 'None', inline: true },
     );
 
     exampleEmbed.addFields(
-        { name: 'Hotspots:', value: userHotspots.length ? userHotspots.join('\n') : 'None', inline: true },
+        { name: 'Hotspots:', value: userHotspots.length ? userHotspots.sort((a, b) => a.localeCompare(b)).join('\n') : 'None', inline: true },
     );
 
     await interaction.reply({ embeds: [exampleEmbed], flags: MessageFlags.Ephemeral });
